@@ -82,24 +82,78 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
   const exportPDF = () => {
     if (!initialLeads || initialLeads.length === 0) return;
     const doc = new jsPDF();
-    doc.text("Contacts - IAMYOKA", 14, 20);
-    const tableColumn = ["Date", "Noms", "Contact", "Projet (Date/Lieu)", "Source"];
-    const tableRows = initialLeads.map(lead => [
-      new Date(lead.createdAt).toLocaleDateString('fr-FR'),
-      lead.names,
-      `${lead.email}\n${lead.phone || ''}`,
-      `${lead.date}\n${lead.location || ''}`,
-      lead.styleResult
-    ]);
+    
+    // Titre Premium
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(44, 42, 41); // brand-ink (#2C2A29)
+    doc.text("IAMYOKA - BOÎTE DE RÉCEPTION", 14, 20);
+    
+    // Sous-titre
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(173, 154, 137); // brand-taupe
+    doc.text(`Exporté le ${new Date().toLocaleDateString('fr-FR')} - Total : ${initialLeads.length} contacts`, 14, 25);
+
+    const tableColumn = ["Date", "Contact", "Projet (Date/Lieu)", "Source", "Style / Services", "Message"];
+    const tableRows = initialLeads.map(lead => {
+      const isContactForm = lead.styleResult?.startsWith('Contact') || lead.styleResult === 'Formulaire Contact';
+      let servicesOrStyle = lead.styleResult;
+      
+      if (isContactForm) {
+        servicesOrStyle = lead.styleResult.replace('Contact (', '').replace(')', '');
+        if (servicesOrStyle === 'Formulaire Contact') {
+          servicesOrStyle = '-';
+        } else {
+          // Formatage propre sous forme de liste pour le PDF
+          servicesOrStyle = servicesOrStyle.split(' / ').map((s: string) => `• ${s}`).join('\n');
+        }
+      } else {
+        servicesOrStyle = `Style Quiz :\n${servicesOrStyle}`;
+      }
+
+      return [
+        new Date(lead.createdAt).toLocaleDateString('fr-FR'),
+        `${lead.names}\n${lead.email}\n${lead.phone || ''}`,
+        `${new Date(lead.date).toLocaleDateString('fr-FR') !== 'Invalid Date' ? new Date(lead.date).toLocaleDateString('fr-FR') : lead.date}\n${(lead.location || '').toUpperCase()}`,
+        isContactForm ? 'Formulaire' : 'Quiz',
+        servicesOrStyle,
+        lead.message || '-'
+      ];
+    });
     
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 30,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [173, 154, 137] }, // brand-taupe
+      styles: { 
+        fontSize: 7.5,
+        font: "helvetica",
+        cellPadding: 3,
+        valign: 'top',
+        lineColor: [234, 230, 223], // brand-sand (#EAE6DF)
+        lineWidth: 0.5,
+        textColor: [44, 42, 41] // brand-ink
+      },
+      headStyles: { 
+        fillColor: [181, 168, 152], // brand-taupe (#B5A898)
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: {
+        fillColor: [249, 248, 246] // brand-paper (#F9F8F6)
+      },
+      columnStyles: {
+        0: { cellWidth: 18 }, // Date
+        1: { cellWidth: 35 }, // Contact
+        2: { cellWidth: 32 }, // Projet
+        3: { cellWidth: 18 }, // Source
+        4: { cellWidth: 38 }, // Style/Services
+        5: { cellWidth: 41 }, // Message
+      }
     });
-    doc.save("contacts.pdf");
+    
+    doc.save("iamyoka_contacts.pdf");
   };
 
   return (
