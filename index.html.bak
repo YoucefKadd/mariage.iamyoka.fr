@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAMYOKA | Mariages</title>
+    
+    <!-- Favicon IAMYOKA (Généré en SVG) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23F9F8F6%22/><text x=%2250%22 y=%2272%22 font-family=%22serif%22 font-size=%2270%22 font-style=%22italic%22 font-weight=%22bold%22 fill=%22%23B5A898%22 text-anchor=%22middle%22>I</text></svg>" type="image/svg+xml">
+   
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Playfair Display pour le côté éditorial/magazine, Jost pour la pureté moderne -->
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-paper': '#F9F8F6', /* Blanc cassé très doux */
+                        'brand-ink': '#2C2A29',   /* Noir charbon (moins agressif que le noir pur) */
+                        'brand-taupe': '#B5A898', /* Beige/Taupe élégant */
+                        'brand-sand': '#EAE6DF',  /* Sable clair pour les fonds secondaires */
+                        'brand-brown': '#5C4A41', /* Brun chaud pour le grand titre façon image */
+                        'brand-peach': '#D9B3A0'  /* Pêche/Taupe clair pour le bouton de réservation */
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Jost"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F9F8F6;
+            color: #2C2A29;
+        }
+        
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hero-image {
+            /* Image de montagne très lumineuse similaire à ta référence RENTHEM */
+            background-image: url('https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=2072&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center 20%;
+            background-attachment: fixed;
+        }
+        
+        /* Overlay blanc très léger en haut pour que le menu reste lisible */
+        .hero-overlay {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 30%);
+        }
+
+        /* Lignes décoratives fines */
+        .thin-line {
+            height: 1px;
+            background-color: #EAE6DF;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased selection:bg-brand-taupe selection:text-white">
+
+    <header class="absolute w-full top-0 z-50 py-8 px-6 md:px-12 flex justify-between items-center text-brand-ink">
+        <div class="w-1/4">
+            <a href="#" class="text-xl md:text-2xl font-sans font-bold tracking-widest uppercase">Iamyoka</a>
+        </div>
+        <nav class="hidden md:flex w-2/4 justify-center space-x-8 lg:space-x-12 text-[10px] tracking-[0.2em] uppercase font-light">
+            <a href="#concept" class="hover:text-brand-taupe transition-colors duration-300">L'Approche</a>
+            <a href="#processus" class="hover:text-brand-taupe transition-colors duration-300">Le Processus</a>
+            <a href="#portfolio" class="hover:text-brand-taupe transition-colors duration-300">Portfolio</a>
+            <a href="#tarifs" class="hover:text-brand-taupe transition-colors duration-300">Prestations</a>
+            <a href="#contact" class="hover:text-brand-taupe transition-colors duration-300">Contact</a>
+        </nav>
+        <div class="w-1/4 flex justify-end">
+            <a href="#contact" class="hidden md:inline-block bg-brand-peach text-white px-8 py-3 rounded-full text-[10px] uppercase tracking-[0.2em] hover:bg-brand-taupe transition-colors duration-300 shadow-sm">
+                Réserver
+            </a>
+        </div>
+    </header>
+
+    <section class="relative h-screen flex items-center justify-center hero-image">
+        <div class="absolute inset-0 hero-overlay"></div>
+        <div class="relative z-10 text-center px-4 w-full max-w-5xl fade-in-up visible">
+            <!-- Titre immense dans la couleur brun chaud de l'image -->
+            <h1 class="text-6xl md:text-8xl lg:text-[11rem] font-serif text-brand-brown mb-2 tracking-tight" style="line-height: 0.9;">
+                MARIAGES
+            </h1>
+            <p class="text-[10px] md:text-xs uppercase tracking-[0.3em] font-light text-brand-brown/70 mt-6">
+                Votre mariage comme au cinéma
+            </p>
+        </div>
+    </section>
+
+    <section id="concept" class="py-24 md:py-32 px-6 md:px-12 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
+            
+            <div class="md:col-span-5 fade-in-up">
+                <h3 class="text-brand-taupe text-xs uppercase tracking-[0.2em] mb-6">Notre Approche</h3>
+                <h2 class="text-4xl md:text-5xl font-serif mb-8 leading-tight">
+                    Documentaire <br><span class="italic text-brand-taupe">Cinématographique</span>
+                </h2>
+                <div class="space-y-6 text-brand-ink/70 font-light text-sm md:text-base leading-relaxed">
+                    <p>
+                        Pour nous, votre mariage est un récit qui se doit d'être authentique. C'est pour cela que nous concevons un univers où le style photographique sur le vif s'allie à une atmosphère digne du 7ème art.
+                    </p>
+                    <p>
+                        Des préparatifs jusqu'au jour J, nous travaillons pour respecter et traduire la vérité du jour où vous vous dites "oui". Pas de poses figées interminables, seulement vos rires francs, la lumière douce d'une fin d'après-midi, et l'intensité d'un regard.
+                    </p>
+                    <p class="font-medium text-brand-ink mt-8">
+                        Basés à Toulouse. <br>Disponibles partout en France et à l'international.
+                    </p>
+                </div>
+            </div>
+
+            <div class="md:col-span-7 relative fade-in-up">
+                <!-- Image décalée avec bordure fine style tableau -->
+                <div class="relative p-4 bg-white shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1974&auto=format&fit=crop" alt="Photographie documentaire" class="w-full h-[500px] md:h-[700px] object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700">
+                </div>
+                <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-brand-sand -z-10 hidden md:block"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="processus" class="py-24 bg-brand-paper px-4 md:px-12 border-t border-brand-sand">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- En-tête de la section -->
+            <div class="text-center mb-16 md:mb-24 fade-in-up">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="h-px bg-brand-taupe/40 w-12 md:w-24"></div>
+                    <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-brand-taupe font-medium">L'Architecture du Souvenir</span>
+                    <div class="h-px bg-brand-taupe/40 w-12 md:w-24"></div>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-serif text-brand-ink">Le déroulé de votre film</h2>
+            </div>
+
+            <div class="relative">
+                
+                <!-- LE FIL D'ARIANE (Ligne verticale globale) - Désormais visible sur mobile -->
+                <div class="absolute top-8 bottom-8 left-1/4 w-px bg-brand-taupe/50 transform -translate-x-1/2 z-0"></div>
+
+                <!-- ÉTAPE 1 -->
+                <div class="relative flex flex-row w-full mb-12 md:mb-20 fade-in-up z-10 group">
+                    
+                    <!-- Colonne Numéro (25%) -->
+                    <div class="w-1/4 flex flex-col items-end pr-4 md:pr-12 pt-4 md:pt-8">
+                        <div class="text-4xl md:text-7xl font-serif italic text-brand-taupe mb-1 md:mb-2 leading-none">I</div>
+                        <div class="text-[8px] md:text-[10px] uppercase tracking-widest text-brand-ink/50 mt-2 md:mt-4 text-right">Premier Contact</div>
+                    </div>
+
+                    <!-- Le Point sur la ligne - Visible sur mobile, taille ajustée -->
+                    <div class="absolute left-1/4 top-7 md:top-14 w-3 h-3 md:w-4 md:h-4 rounded-full border border-brand-taupe bg-brand-paper flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 group-hover:scale-125 transition-transform duration-300">
+                        <div class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-brand-taupe"></div>
+                    </div>
+
+                    <!-- Colonne Carte (75%) -->
+                    <div class="w-3/4 pl-6 md:pl-12">
+                        <div class="bg-white p-6 md:p-12 shadow-[0_4px_30px_rgba(0,0,0,0.02)] border border-brand-sand/40">
+                            <div class="inline-block bg-brand-paper text-brand-ink px-3 py-1 md:px-4 md:py-1.5 text-[8px] md:text-[9px] uppercase tracking-[0.2em] mb-4 md:mb-6 font-medium">L'Échange</div>
+                            <h4 class="text-2xl md:text-3xl font-serif text-brand-ink mb-3 md:mb-4">Autour d'un café</h4>
+                            <p class="text-xs md:text-sm font-light text-brand-ink/70 leading-relaxed">
+                                Vous nous racontez votre histoire et comment vous voyez votre mariage. Le but est d'apprendre à vous connaître et de ressentir votre sensibilité pour créer le film le plus proche de vous, du thème et de la volonté de votre mariage.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÉTAPE 2 -->
+                <div class="relative flex flex-row w-full mb-12 md:mb-20 fade-in-up z-10 group">
+                    <div class="w-1/4 flex flex-col items-end pr-4 md:pr-12 pt-4 md:pt-8">
+                        <div class="text-4xl md:text-7xl font-serif italic text-brand-taupe mb-1 md:mb-2 leading-none">II</div>
+                        <div class="text-[8px] md:text-[10px] uppercase tracking-widest text-brand-ink/50 mt-2 md:mt-4 text-right">Avant le mariage</div>
+                    </div>
+                    
+                    <div class="absolute left-1/4 top-7 md:top-14 w-3 h-3 md:w-4 md:h-4 rounded-full border border-brand-taupe bg-brand-paper flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 group-hover:scale-125 transition-transform duration-300">
+                        <div class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-brand-taupe"></div>
+                    </div>
+
+                    <div class="w-3/4 pl-6 md:pl-12">
+                        <div class="bg-white p-6 md:p-12 shadow-[0_4px_30px_rgba(0,0,0,0.02)] border border-brand-sand/40">
+                            <div class="inline-block bg-brand-paper text-brand-ink px-3 py-1 md:px-4 md:py-1.5 text-[8px] md:text-[9px] uppercase tracking-[0.2em] mb-4 md:mb-6 font-medium">La Direction</div>
+                            <h4 class="text-2xl md:text-3xl font-serif text-brand-ink mb-3 md:mb-4">Vision & Logistique</h4>
+                            <p class="text-xs md:text-sm font-light text-brand-ink/70 leading-relaxed">
+                                Nous vous présentons la direction artistique la plus adéquate que l'on a choisie pour votre mariage. Nous faisons ensuite un point sur la logistique et l'organisation pour que nous puissions coordonner nos équipes le grand jour.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÉTAPE 3 -->
+                <div class="relative flex flex-row w-full mb-12 md:mb-20 fade-in-up z-10 group">
+                    <div class="w-1/4 flex flex-col items-end pr-4 md:pr-12 pt-4 md:pt-8">
+                        <div class="text-4xl md:text-7xl font-serif italic text-brand-taupe mb-1 md:mb-2 leading-none">III</div>
+                        <div class="text-[8px] md:text-[10px] uppercase tracking-widest text-brand-ink/50 mt-2 md:mt-4 text-right">Le Grand Jour</div>
+                    </div>
+                    
+                    <div class="absolute left-1/4 top-7 md:top-14 w-3 h-3 md:w-4 md:h-4 rounded-full border border-brand-taupe bg-brand-paper flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 group-hover:scale-125 transition-transform duration-300">
+                        <div class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-brand-taupe"></div>
+                    </div>
+
+                    <div class="w-3/4 pl-6 md:pl-12">
+                        <div class="bg-white p-6 md:p-12 shadow-[0_4px_30px_rgba(0,0,0,0.02)] border border-brand-sand/40">
+                            <div class="inline-block bg-brand-paper text-brand-ink px-3 py-1 md:px-4 md:py-1.5 text-[8px] md:text-[9px] uppercase tracking-[0.2em] mb-4 md:mb-6 font-medium">Le Tournage</div>
+                            <h4 class="text-2xl md:text-3xl font-serif text-brand-ink mb-3 md:mb-4">Prise de vue</h4>
+                            <p class="text-xs md:text-sm font-light text-brand-ink/70 leading-relaxed">
+                                Le jour de votre mariage, place au tournage et à la prise de vue. Nous intervenons avec la plus grande discrétion pour capturer l'authenticité de chaque instant, des préparatifs jusqu'à la soirée.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÉTAPE 4 -->
+                <div class="relative flex flex-row w-full fade-in-up z-10 group">
+                    <div class="w-1/4 flex flex-col items-end pr-4 md:pr-12 pt-4 md:pt-8">
+                        <div class="text-4xl md:text-7xl font-serif italic text-brand-taupe mb-1 md:mb-2 leading-none">IV</div>
+                        <div class="text-[8px] md:text-[10px] uppercase tracking-widest text-brand-ink/50 mt-2 md:mt-4 text-right">Après le mariage</div>
+                    </div>
+                    
+                    <div class="absolute left-1/4 top-7 md:top-14 w-3 h-3 md:w-4 md:h-4 rounded-full border border-brand-taupe bg-brand-paper flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 group-hover:scale-125 transition-transform duration-300">
+                        <div class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-brand-taupe"></div>
+                    </div>
+
+                    <div class="w-3/4 pl-6 md:pl-12">
+                        <div class="bg-white p-6 md:p-12 shadow-[0_4px_30px_rgba(0,0,0,0.02)] border border-brand-sand/40">
+                            <div class="inline-block bg-brand-paper text-brand-ink px-3 py-1 md:px-4 md:py-1.5 text-[8px] md:text-[9px] uppercase tracking-[0.2em] mb-4 md:mb-6 font-medium">La Livraison</div>
+                            <h4 class="text-2xl md:text-3xl font-serif text-brand-ink mb-3 md:mb-4">Découverte de l'œuvre</h4>
+                            <p class="text-xs md:text-sm font-light text-brand-ink/70 leading-relaxed">
+                                Livraison de vos photos et de votre film via une galerie privée en ligne de haute qualité, avec la possibilité d'ajouter des supports physiques d'exception (coffret, album).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="salon" class="py-20 bg-brand-ink text-brand-paper px-6">
+        <div class="max-w-4xl mx-auto text-center fade-in-up">
+            <span class="inline-block border border-brand-taupe text-brand-taupe px-4 py-1 text-xs uppercase tracking-[0.2em] mb-8">
+                Exclusivité Salon du Mariage
+            </span>
+            <h2 class="text-3xl md:text-4xl font-serif mb-6 italic">Un cadeau pour votre grand jour</h2>
+            <p class="font-light text-brand-paper/80 leading-relaxed mb-10 max-w-2xl mx-auto">
+                Parce qu'une belle rencontre mérite d'être célébrée. Bénéficiez d'une réduction spéciale pour toute prise de contact suite à notre échange sur le salon, et d'une <strong class="text-brand-taupe font-normal">remise exceptionnelle supplémentaire</strong> pour toute réservation validée directement sur place.
+            </p>
+            <a href="#contact" class="inline-block bg-brand-taupe text-brand-ink px-10 py-4 text-xs uppercase tracking-[0.2em] hover:bg-brand-paper transition-colors duration-300">
+                Profiter de l'offre
+            </a>
+        </div>
+    </section>
+
+    <section id="portfolio-films" class="py-24 bg-white px-6 md:px-12">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center mb-16 md:mb-20 fade-in-up">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="h-px bg-brand-taupe/40 w-12 md:w-24"></div>
+                    <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-brand-taupe font-medium">Le Cinéma</span>
+                    <div class="h-px bg-brand-taupe/40 w-12 md:w-24"></div>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-serif text-brand-ink mb-4" id="portfolio">Vos souvenirs en mouvement</h2>
+                <p class="text-brand-ink/50 font-light text-sm max-w-2xl mx-auto">L'intensité d'un regard, le souffle du vent, l'éclat d'un rire. Votre journée racontée comme une véritable œuvre cinématographique.</p>
+            </div>
+
+            <!-- Grille Vidéos -->
+            <div class="space-y-6 md:space-y-12 fade-in-up">
+                <!-- Vidéo Principale (Full width) -->
+                <div class="group cursor-pointer relative">
+                    <div class="relative aspect-video bg-brand-sand overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2069&auto=format&fit=crop" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 grayscale-[10%] group-hover:grayscale-0">
+                        <div class="absolute inset-0 bg-brand-ink/10 group-hover:bg-brand-ink/20 transition-colors duration-500"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-16 h-16 md:w-20 md:h-20 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                                <svg class="w-6 h-6 md:w-8 md:h-8 text-brand-ink ml-1 md:ml-2" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-[10px] md:text-xs uppercase tracking-[0.2em] text-brand-ink/60 text-center font-medium">Film Long Format — Édition Cinéma</p>
+                </div>
+
+                <!-- Vidéos Secondaires (2 colonnes) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
+                    <div class="group cursor-pointer relative">
+                        <div class="relative aspect-[16/9] bg-brand-sand overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 grayscale-[10%] group-hover:grayscale-0">
+                            <div class="absolute inset-0 bg-brand-ink/10 group-hover:bg-brand-ink/20 transition-colors duration-500"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-12 h-12 md:w-16 md:h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                    <svg class="w-5 h-5 text-brand-ink ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-[10px] md:text-xs uppercase tracking-[0.2em] text-brand-ink/60 text-center font-medium">Teaser — Rythme & Émotion</p>
+                    </div>
+
+                    <div class="group cursor-pointer relative">
+                        <div class="relative aspect-[16/9] bg-brand-sand overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1583939411023-14783179e581?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 grayscale-[10%] group-hover:grayscale-0">
+                            <div class="absolute inset-0 bg-brand-ink/10 group-hover:bg-brand-ink/20 transition-colors duration-500"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-12 h-12 md:w-16 md:h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                    <svg class="w-5 h-5 text-brand-ink ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-[10px] md:text-xs uppercase tracking-[0.2em] text-brand-ink/60 text-center font-medium">Élopement — Intimité</p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <section id="portfolio-photos" class="py-24 bg-brand-paper px-6 md:px-12 border-t border-brand-sand/50">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center mb-16 md:mb-20 fade-in-up">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="h-px bg-brand-taupe/40 w-12 md:w-24"></div>
+                    <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-brand-taupe font-medium">Le Documentaire</span>
+                    <div class="h-px bg-brand-taupe/40 w-12 md:w-24"></div>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-serif text-brand-ink mb-4">L'art de figer l'instant</h2>
+                <p class="text-brand-ink/50 font-light text-sm max-w-2xl mx-auto">Aucune pose figée, seulement la vérité de votre journée. Un mélange de lumière pure et d'ombres intimes.</p>
+            </div>
+
+            <!-- Grille Photos Style Éditorial / Magazine -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 fade-in-up">
+                
+                <!-- Grande photo (Lumineux) -->
+                <div class="md:col-span-2 md:row-span-2 group overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1541250848049-b4f7146120ef?q=80&w=1974&auto=format&fit=crop" class="w-full h-[400px] md:h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 grayscale-[20%] hover:grayscale-0">
+                </div>
+
+                <!-- Moyenne photo horizontale (Moody) -->
+                <div class="md:col-span-2 group overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop" class="w-full h-[300px] md:h-[400px] object-cover transform group-hover:scale-105 transition-transform duration-1000 grayscale-[20%] hover:grayscale-0">
+                </div>
+
+                <!-- Deux petites photos verticales (Détails / Portrait) -->
+                <div class="md:col-span-1 group overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop" class="w-full h-[300px] md:h-[400px] object-cover transform group-hover:scale-105 transition-transform duration-1000 grayscale-[20%] hover:grayscale-0">
+                </div>
+                <div class="md:col-span-1 group overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1974&auto=format&fit=crop" class="w-full h-[300px] md:h-[400px] object-cover transform group-hover:scale-105 transition-transform duration-1000 grayscale-[20%] hover:grayscale-0">
+                </div>
+
+            </div>
+            
+            <div class="mt-12 text-center fade-in-up">
+                <a href="#contact" class="inline-block border-b border-brand-taupe text-brand-taupe pb-1 text-[10px] uppercase tracking-[0.2em] hover:text-brand-ink hover:border-brand-ink transition-colors duration-300">
+                    Découvrir plus d'histoires complètes
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="a-propos" class="py-24 bg-white px-6 md:px-12">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-20">
+            <div class="md:w-1/2 fade-in-up">
+                <h3 class="text-brand-taupe text-xs uppercase tracking-[0.2em] mb-4">La Vision derrière la caméra</h3>
+                <h2 class="text-4xl md:text-5xl font-serif text-brand-ink mb-6 italic">Apprenez-en plus sur Iamyoka</h2>
+                <div class="space-y-6 text-brand-ink/70 font-light text-sm leading-relaxed">
+                    <p>
+                        Derrière IAMYOKA se cache une véritable passion pour l'image narrative. Notre objectif n'est pas simplement de capturer des moments, mais de créer un héritage visuel qui traversera les générations.
+                    </p>
+                    <p>
+                        Que ce soit à travers l'objectif de nos caméras ou derrière nos appareils photo, nous cherchons constamment l'équilibre parfait entre la lumière naturelle, l'émotion brute et la composition cinématographique. 
+                    </p>
+                    <p>
+                        Grands voyageurs dans l'âme, notre inspiration puise dans les paysages grandioses et les cultures du monde entier. Cette ouverture d'esprit nous permet de nous adapter à toutes les atmosphères, du domaine classique au sud de la France jusqu'à l'élopement intimiste à l'autre bout du monde.
+                    </p>
+                </div>
+                <div class="mt-8">
+                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Signature_of_John_Hancock.svg/1200px-Signature_of_John_Hancock.svg.png" alt="Signature" class="h-12 opacity-40 mix-blend-multiply">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="conseils" class="py-24 bg-brand-ink text-brand-paper px-6 md:px-12">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 fade-in-up">
+                <h3 class="text-brand-taupe text-xs uppercase tracking-[0.2em] mb-4">Préparation</h3>
+                <h2 class="text-3xl md:text-4xl font-serif italic mb-6">Nos petits conseils</h2>
+                <p class="text-brand-paper/80 font-light text-sm max-w-2xl mx-auto leading-relaxed">
+                    Organiser un mariage est une aventure. Voici ce que nous avons appris en accompagnant des centaines de couples :
+                </p>
+            </div>
+
+            <!-- Grille sur 4 colonnes pour intégrer tous tes points -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 fade-in-up">
+                <div class="border-t border-brand-taupe/30 pt-6">
+                    <span class="text-brand-taupe text-xl font-serif italic block mb-4">01.</span>
+                    <h4 class="text-lg font-serif mb-3">Choisir vos prestataires</h4>
+                    <p class="text-brand-paper/70 text-xs font-light leading-relaxed">
+                        Prenez le temps, cherchez ceux qui partagent vos valeurs. Le feeling humain est primordial pour que vous soyez totalement à l'aise le grand jour.
+                    </p>
+                </div>
+                <div class="border-t border-brand-taupe/30 pt-6">
+                    <span class="text-brand-taupe text-xl font-serif italic block mb-4">02.</span>
+                    <h4 class="text-lg font-serif mb-3">Ne pas hésiter à déléguer</h4>
+                    <p class="text-brand-paper/70 text-xs font-light leading-relaxed">
+                        Une wedding planner peut vous faire gagner en sérénité. Lâcher prise le jour J est le secret pour vivre le moment présent et obtenir les plus belles images.
+                    </p>
+                </div>
+                <div class="border-t border-brand-taupe/30 pt-6">
+                    <span class="text-brand-taupe text-xl font-serif italic block mb-4">03.</span>
+                    <h4 class="text-lg font-serif mb-3">Rester alignés</h4>
+                    <p class="text-brand-paper/70 text-xs font-light leading-relaxed">
+                        Ce mariage est le vôtre, pas celui des autres. Ne faites aucun compromis sur votre vision et vivez-le selon vos propres envies et règles.
+                    </p>
+                </div>
+                <div class="border-t border-brand-taupe/30 pt-6">
+                    <span class="text-brand-taupe text-xl font-serif italic block mb-4">04.</span>
+                    <h4 class="text-lg font-serif mb-3">Notre carnet d'adresses</h4>
+                    <p class="text-brand-paper/70 text-xs font-light leading-relaxed">
+                        Nous partageons volontiers notre carnet d’adresses de prestataires de confiance, construit avec les années. Car un mariage réussi, c’est aussi l’alchimie entre les bonnes personnes.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tarifs" class="py-24 bg-brand-paper px-6 border-t border-brand-sand">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-20 fade-in-up">
+                <h3 class="text-brand-taupe text-xs uppercase tracking-[0.2em] mb-4">Investissement</h3>
+                <h2 class="text-4xl md:text-5xl font-serif">Collections Mariage</h2>
+                <p class="text-brand-ink/50 font-light text-sm max-w-2xl mx-auto mt-6">Des formules pensées pour s'adapter à votre grand jour, avec un accompagnement sur-mesure du début à la fin.</p>
+            </div>
+
+            <!-- Grille des 3 Formules Classiques -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch fade-in-up">
+                
+                <!-- Formule 1 : Photo -->
+                <div class="bg-white border border-brand-sand/50 p-8 flex flex-col h-full shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-lg transition-shadow duration-500 group">
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-brand-taupe mb-2">Photographie Seule</p>
+                    <h4 class="text-3xl font-serif text-brand-ink mb-2">Le Documentaire</h4>
+                    <div class="text-2xl font-serif text-brand-ink mb-6">À partir de 2 200 €</div>
+                    <hr class="border-brand-sand mb-8">
+                    
+                    <ul class="text-sm font-light text-brand-ink/70 space-y-4 flex-grow mb-10">
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Rendez-vous de préparation & logistique</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Couverture complète des préparatifs à la soirée</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Retouche colorimétrique fine de chaque image</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Livraison sur galerie privée en ligne Haute Définition</span>
+                        </li>
+                    </ul>
+
+                    <div class="bg-brand-sand/20 p-5 border-l-2 border-brand-taupe mt-auto group-hover:bg-brand-sand/40 transition-colors duration-300">
+                        <p class="text-[10px] uppercase tracking-[0.1em] font-medium text-brand-ink mb-2">Idéal pour vous si...</p>
+                        <p class="text-xs font-light text-brand-ink/80 leading-relaxed italic">
+                            ... vous accordez une importance capitale aux souvenirs sur papier glacé et souhaitez revivre chaque instant à travers des images figées, authentiques et intemporelles.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Formule 2 : Photo + Vidéo (MISE EN AVANT) -->
+                <div class="bg-brand-ink border border-brand-ink p-8 flex flex-col h-full shadow-2xl relative transform lg:-translate-y-4 group">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-brand-taupe text-white px-5 py-1 text-[9px] uppercase tracking-[0.2em] shadow-sm whitespace-nowrap">
+                        L'Expérience Complète
+                    </div>
+                    
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-brand-taupe mb-2 mt-2">Photo & Vidéo</p>
+                    <h4 class="text-3xl font-serif text-brand-paper mb-2">Le 7ème Art</h4>
+                    <div class="text-2xl font-serif text-brand-taupe mb-6">À partir de 3 800 €</div>
+                    <hr class="border-brand-taupe/30 mb-8">
+                    
+                    <ul class="text-sm font-light text-brand-paper/80 space-y-4 flex-grow mb-10">
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Rendez-vous de préparation & direction artistique</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Couverture à deux (1 Photographe + 1 Vidéaste)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Film cinématographique (Teaser + Film Long)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Reportage photo documentaire complet</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Prises de vue par drone incluses</span>
+                        </li>
+                    </ul>
+
+                    <div class="bg-white/5 p-5 border-l-2 border-brand-taupe mt-auto">
+                        <p class="text-[10px] uppercase tracking-[0.1em] font-medium text-brand-taupe mb-2">Idéal pour vous si...</p>
+                        <p class="text-xs font-light text-brand-paper/70 leading-relaxed italic">
+                            ... vous ne voulez faire aucun compromis. Vous souhaitez l'intensité narrative d'un film pour revivre les discours et les frissons, couplée à l'élégance de la photographie.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Formule 3 : Vidéo -->
+                <div class="bg-white border border-brand-sand/50 p-8 flex flex-col h-full shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-lg transition-shadow duration-500 group">
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-brand-taupe mb-2">Vidéo Seule</p>
+                    <h4 class="text-3xl font-serif text-brand-ink mb-2">Le Cinéma</h4>
+                    <div class="text-2xl font-serif text-brand-ink mb-6">À partir de 3 000 €</div>
+                    <hr class="border-brand-sand mb-8">
+                    
+                    <ul class="text-sm font-light text-brand-ink/70 space-y-4 flex-grow mb-10">
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Rendez-vous de préparation & repérage</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Couverture complète des préparatifs à la soirée</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Montage cinématographique & étalonnage (Color Grading)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Livraison formats Web et TV en 4K</span>
+                        </li>
+                    </ul>
+
+                    <div class="bg-brand-sand/20 p-5 border-l-2 border-brand-taupe mt-auto group-hover:bg-brand-sand/40 transition-colors duration-300">
+                        <p class="text-[10px] uppercase tracking-[0.1em] font-medium text-brand-ink mb-2">Idéal pour vous si...</p>
+                        <p class="text-xs font-light text-brand-ink/80 leading-relaxed italic">
+                            ... vous avez déjà votre photographe mais rêvez d'une véritable œuvre en mouvement pour immortaliser les voix, les musiques et l'ambiance de votre journée.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- NOUVELLE OFFRE ULTRA-PREMIUM (ÉQUIPE COMPLÈTE) -->
+            <div class="mt-12 bg-brand-ink text-brand-paper border border-brand-ink p-8 md:p-12 shadow-2xl relative fade-in-up">
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-brand-taupe text-white px-6 py-1 text-[9px] uppercase tracking-[0.2em] shadow-sm whitespace-nowrap">
+                    L'Expérience Studio & Grands Événements
+                </div>
+                
+                <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                    <div class="lg:w-1/3 text-center lg:text-left">
+                        <p class="text-[10px] uppercase tracking-[0.2em] text-brand-taupe mb-2 mt-4">La Production Intégrale</p>
+                        <h4 class="text-3xl font-serif mb-2">Le Blockbuster</h4>
+                        <div class="text-2xl font-serif text-brand-taupe mb-6">Sur-mesure</div>
+                        <hr class="border-brand-taupe/30 mb-8 lg:hidden">
+                    </div>
+                    
+                    <div class="lg:w-1/3">
+                        <ul class="text-sm font-light text-brand-paper/80 space-y-6">
+                            <li class="flex items-start">
+                                <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                                <div>
+                                    <span class="font-medium text-white block">1 Photographe Principal</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                                <div>
+                                    <span class="font-medium text-white block">2 à 3 Vidéastes</span>
+                                    <span class="block text-brand-paper/60 text-xs mt-1">(Couverture multi-angles, drone et steadicam)</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-4 h-4 text-brand-taupe mt-1 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+                                <div>
+                                    <span class="font-medium text-white block">1 Content Creator</span>
+                                    <span class="block text-brand-paper/60 text-xs mt-1">(Vidéos verticales immersives pour vos réseaux, livrées en 24h)</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="lg:w-1/3 w-full">
+                        <div class="bg-white/5 p-5 border-l-2 border-brand-taupe h-full flex flex-col justify-center">
+                            <p class="text-[10px] uppercase tracking-[0.1em] font-medium text-brand-taupe mb-2">Nous vous conseillons cette offre si...</p>
+                            <p class="text-xs font-light text-brand-paper/70 leading-relaxed italic">
+                                ... vous organisez un mariage d'exception, sur plusieurs jours ou avec de très nombreux invités. Notre équipe complète garantit qu'absolument aucun détail, aucun angle et aucune émotion ne sera oublié, tout en vous fournissant du contenu immédiat pour vos proches.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center fade-in-up bg-white p-8 border border-brand-sand/50 shadow-sm">
+                <p class="text-sm font-serif text-brand-ink mb-6">Personnalisez votre expérience avec nos options à la carte :</p>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <span class="inline-block border border-brand-taupe/40 px-5 py-2 text-[10px] uppercase tracking-widest text-brand-ink hover:bg-brand-taupe hover:text-white transition-colors duration-300 cursor-default">+ Photobooth</span>
+                    <span class="inline-block border border-brand-taupe/40 px-5 py-2 text-[10px] uppercase tracking-widest text-brand-ink hover:bg-brand-taupe hover:text-white transition-colors duration-300 cursor-default">+ Album Photo Premium</span>
+                    <span class="inline-block border border-brand-taupe/40 px-5 py-2 text-[10px] uppercase tracking-widest text-brand-ink hover:bg-brand-taupe hover:text-white transition-colors duration-300 cursor-default">+ Prise de vue Drone (Seul)</span>
+                    <span class="inline-block border border-brand-taupe/40 px-5 py-2 text-[10px] uppercase tracking-widest text-brand-ink hover:bg-brand-taupe hover:text-white transition-colors duration-300 cursor-default">+ Séance Engagement (Couple)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION TÉMOIGNAGES RECONSTRUITE/FERMÉE -->
+    <section id="temoignages" class="py-24 bg-white px-6 md:px-12 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 fade-in-up">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="h-px bg-brand-taupe/40 w-12 md:w-24"></div>
+                    <span class="px-4 text-[10px] uppercase tracking-[0.2em] text-brand-taupe font-medium">Preuve Sociale</span>
+                    <div class="h-px bg-brand-taupe/40 w-12 md:w-24"></div>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-serif text-brand-ink italic mb-4">Vos petits messages</h2>
+            </div>
+
+            <!-- Scrollable container for testimonials to act like a simple carousel on mobile -->
+            <div class="flex overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar space-x-6 md:grid md:grid-cols-2 md:space-x-0 md:gap-8 fade-in-up">
+                
+                <!-- Témoignage 1 -->
+                <div class="snap-center shrink-0 w-[85vw] md:w-auto bg-brand-paper p-8 md:p-12 border border-brand-sand/50">
+                    <div class="flex text-brand-taupe mb-6">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-serif mb-4">"Un souvenir inestimable"</h3>
+                    <p class="text-sm font-light text-brand-ink/70 leading-relaxed mb-6">
+                        "L'équipe a su capturer l'essence de notre journée avec une telle discrétion. Le film est tout simplement digne d'un cinéma, nos familles ont été bouleversées par l'émotion."
+                    </p>
+                    <p class="text-[10px] uppercase tracking-[0.2em] font-medium">— Camille & Thomas</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Script d'animation simple -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

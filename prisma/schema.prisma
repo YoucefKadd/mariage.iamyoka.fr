@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  url       String
+  title     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Film {
+  id         String   @id @default(cuid())
+  url        String?
+  youtubeUrl String
+  title      String
+  subtitle   String?
+  badge      String?
+  isMain     Boolean  @default(false)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model Setting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  names       String
+  email       String
+  phone       String?
+  date        String?
+  location    String?
+  message     String?  @db.Text
+  styleResult String
+  createdAt   DateTime @default(now())
+}
+
+model QuizQuestion {
+  id        String       @id @default(cuid())
+  title     String
+  subtitle  String?
+  order     Int          @default(0)
+  options   QuizOption[]
+  createdAt DateTime     @default(now())
+}
+
+model QuizOption {
+  id         String       @id @default(cuid())
+  styleId    String
+  imageUrl   String
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model FaqItem {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}

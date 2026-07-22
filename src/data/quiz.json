@@ -1,0 +1,85 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "title": "Quelle ambiance vous attire le plus ?",
+      "subtitle": "Laissez-vous guider par votre premier instinct visuel.",
+      "options": [
+        {
+          "id": "o1-1",
+          "imageUrl": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05377-ySK0NtyC3Iht3kSw.jpg",
+          "styleId": "editorial"
+        },
+        {
+          "id": "o1-2",
+          "imageUrl": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=800",
+          "styleId": "documentaire"
+        },
+        {
+          "id": "o1-3",
+          "imageUrl": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/main-copier-01.00_01_05_15.still007-Bwq2XZyiBn2E6NaP.png",
+          "styleId": "cinematique"
+        },
+        {
+          "id": "o1-4",
+          "imageUrl": "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&q=80&w=800",
+          "styleId": "lumineux"
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "title": "Quel moment attendez-vous avec impatience ?",
+      "subtitle": "Sélectionnez la photo qui représente votre instant idéal.",
+      "options": [
+        {
+          "id": "o2-1",
+          "imageUrl": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05372-PozUxhtU7jm8eEWB.jpg",
+          "styleId": "documentaire"
+        },
+        {
+          "id": "o2-2",
+          "imageUrl": "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=800",
+          "styleId": "lumineux"
+        },
+        {
+          "id": "o2-3",
+          "imageUrl": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/noorself_photo_therapie_mathilde-3-QLNiSFzOQc1QdfdT.jpg",
+          "styleId": "editorial"
+        },
+        {
+          "id": "o2-4",
+          "imageUrl": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/main-copier-01.00_02_04_12.still018-suAVaqbOkezklrkF.png",
+          "styleId": "cinematique"
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "title": "Si votre couple était une photo ?",
+      "subtitle": "Ne réfléchissez pas, cliquez.",
+      "options": [
+        {
+          "id": "o3-1",
+          "imageUrl": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05375-nn5VFMRgIm5SXduV.jpg",
+          "styleId": "cinematique"
+        },
+        {
+          "id": "o3-2",
+          "imageUrl": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05375-nn5VFMRgIm5SXduV.jpg",
+          "styleId": "editorial"
+        },
+        {
+          "id": "o3-3",
+          "imageUrl": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800",
+          "styleId": "lumineux"
+        },
+        {
+          "id": "o3-4",
+          "imageUrl": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05364-Kybu5PseRxyOgtJ0.jpg",
+          "styleId": "documentaire"
+        }
+      ]
+    }
+  ]
+}

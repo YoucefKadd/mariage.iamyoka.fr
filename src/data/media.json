@@ -1,0 +1,123 @@
+{
+  "heroVideo": "https://www.pexels.com/fr-fr/download/video/10534244/",
+  "photos": [
+    {
+      "id": "1784415508079",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05377-ySK0NtyC3Iht3kSw.jpg",
+      "title": "Au cœur des bois"
+    },
+    {
+      "id": "1784415420438",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/2-dsc07684-enhanced-nr-tQCzIUMExsKmMrbb.jpg",
+      "title": "Dire oui sous les étoiles"
+    },
+    {
+      "id": "1784415387535",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/noorself_photo_therapie_mathilde-3-QLNiSFzOQc1QdfdT.jpg",
+      "title": "Oeil"
+    },
+    {
+      "id": "1784415308645",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/aby_230426_mentoring_experientiel-78-ydrINSjBLCit2SyA.jpg",
+      "title": "La Dame en Rouge"
+    },
+    {
+      "id": "1784414890694",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05374-xdFxmtpTAMZwYNV3.jpg",
+      "title": "Au cœur du bois"
+    },
+    {
+      "id": "1784414360277",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05369-2bzfX8mbhQxYH2Va.jpg",
+      "title": "Vin D'honneur"
+    },
+    {
+      "id": "1784414336283",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05357-nVcd9SjfwolMme95.jpg",
+      "title": "Vin d'honneur"
+    },
+    {
+      "id": "1784414314000",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05363-Je3bSksHogOksb7w.jpg",
+      "title": "Vin d'honneur"
+    },
+    {
+      "id": "1784414280374",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05375-2-cGSGGOKhS4NHawDp.jpg",
+      "title": "Manon & Julien"
+    },
+    {
+      "id": "1784414239318",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/dsc05377-ySK0NtyC3Iht3kSw.jpg",
+      "title": "Manon & Julien"
+    },
+    {
+      "id": "1784414196227",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/main-copier-01.00_02_04_12.still018-suAVaqbOkezklrkF.png",
+      "title": "Manon & Julienv"
+    },
+    {
+      "id": "1784414173227",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/main-copier-01.00_00_56_16.still003-gPoYDtb0xgFwluvK.png",
+      "title": "Manon & Julien"
+    },
+    {
+      "id": "1784414123182",
+      "url": "https://assets.zyrosite.com/YKb3aaNRJNC6bwLr/main-copier-01.00_01_05_15.still007-Bwq2XZyiBn2E6NaP.png",
+      "title": "Manon & Julien"
+    },
+    {
+      "id": "p4",
+      "url": "https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1974&auto=format&fit=crop",
+      "title": "L'Attente"
+    }
+  ],
+  "films": [
+    {
+      "id": "1784414501343",
+      "url": "https://img.youtube.com/vi/rsaHC2jdudo/maxresdefault.jpg",
+      "youtubeUrl": "https://youtu.be/rsaHC2jdudo?si=HxpxG1Zlt7fKvbDG",
+      "ytId": "rsaHC2jdudo",
+      "title": "Antidote - Fané",
+      "subtitle": "",
+      "badge": "Film",
+      "isMain": true
+    },
+    {
+      "id": "f1",
+      "url": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2069&auto=format&fit=crop",
+      "title": "Élise & Maxime",
+      "subtitle": "Château de la Ligne, Bordeaux",
+      "badge": "Sélection Officielle",
+      "isMain": true
+    },
+    {
+      "id": "f2",
+      "url": "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?q=80&w=2070&auto=format&fit=crop",
+      "title": "Clara & Hugo",
+      "subtitle": "Teaser — Rythme & Émotion",
+      "isMain": false
+    },
+    {
+      "id": "1784415694710",
+      "url": "https://img.youtube.com/vi/6WESlzJ7--A/maxresdefault.jpg",
+      "youtubeUrl": "https://youtu.be/6WESlzJ7--A?si=gj0HMc-I-CUq59ND",
+      "ytId": "6WESlzJ7--A",
+      "title": "Antidote - Noctam'bulle",
+      "subtitle": "",
+      "badge": "",
+      "isMain": false
+    },
+    {
+      "id": "1784415728131",
+      "url": "https://img.youtube.com/vi/KfgxpVd8YU4/maxresdefault.jpg",
+      "youtubeUrl": "https://youtu.be/KfgxpVd8YU4?si=a01zno0t6tpkg9CE",
+      "ytId": "KfgxpVd8YU4",
+      "title": "Antidote : Mon béret",
+      "subtitle": "",
+      "badge": "",
+      "isMain": false
+    }
+  ],
+  "heroYtId": null
+}
