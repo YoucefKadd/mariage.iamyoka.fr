@@ -35,12 +35,15 @@ export async function submitContactForm(data: FormData) {
     // 2. Envoyer l'email
     const transporter = nodemailer.createTransport({
       host: "smtp.hostinger.com",
-      port: 465,
-      secure: true,
+      port: 587,
+      secure: false, // false pour le port 587 (TLS/STARTTLS), requis sur les serveurs cloud comme Netlify/AWS
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: {
+        rejectUnauthorized: false // évite les erreurs de certificat SSL sur certains serveurs cloud
+      }
     });
 
     const mailOptions = {
