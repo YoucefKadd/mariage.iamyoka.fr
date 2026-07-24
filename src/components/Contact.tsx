@@ -57,9 +57,9 @@ export default function Contact() {
                         <input type="tel" id="phone" name="phone" className="w-full bg-transparent border-b border-brand-taupe/40 py-3 text-sm focus:outline-none focus:border-brand-taupe transition-colors peer placeholder-transparent" placeholder="Téléphone" />
                         <label htmlFor="phone" className="absolute left-0 top-3 text-brand-paper/50 text-sm transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-brand-taupe peer-placeholder-shown:text-sm peer-placeholder-shown:top-3">Votre téléphone</label>
                     </div>
-                    <div className="relative">
-                        <input type="text" id="date" name="date" className="w-full bg-transparent border-b border-brand-taupe/40 py-3 text-sm focus:outline-none focus:border-brand-taupe transition-colors peer placeholder-transparent" placeholder="Date" />
-                        <label htmlFor="date" className="absolute left-0 top-3 text-brand-paper/50 text-sm transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-brand-taupe peer-placeholder-shown:text-sm peer-placeholder-shown:top-3">Date du mariage (si connue)</label>
+                    <div>
+                        <label htmlFor="date" className="block text-brand-paper/50 text-xs uppercase tracking-widest mb-1">Date du mariage (si connue)</label>
+                        <input type="date" id="date" name="date" className="w-full bg-transparent border-b border-brand-taupe/40 py-2 text-sm focus:outline-none focus:border-brand-taupe transition-colors text-brand-paper [color-scheme:dark]" />
                     </div>
                 </div>
                 

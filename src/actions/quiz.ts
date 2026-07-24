@@ -144,3 +144,23 @@ export async function addLead(data: FormData) {
   revalidatePath('/admin');
   return { success: true };
 }
+
+export async function deleteLeads(ids: string[], password: string) {
+  const ADMIN_PASSWORD = "iamyoka-admin";
+  if (password !== ADMIN_PASSWORD) {
+    return { error: "Mot de passe d'administration incorrect." };
+  }
+
+  if (!ids || ids.length === 0) {
+    return { error: "Aucun prospect sélectionné." };
+  }
+
+  await prisma.lead.deleteMany({
+    where: {
+      id: { in: ids }
+    }
+  });
+
+  revalidatePath('/admin');
+  return { success: true };
+}

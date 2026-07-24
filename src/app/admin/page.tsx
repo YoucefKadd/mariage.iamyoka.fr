@@ -3,6 +3,7 @@ import { getMedia } from '@/actions/media';
 import { getQuiz, getLeads } from '@/actions/quiz';
 import { getFaqs } from '@/actions/faq';
 import AdminDashboard from '@/components/AdminDashboard';
+import PasswordInput from '@/components/PasswordInput';
 import { redirect } from 'next/navigation';
 
 export default async function AdminPage() {
@@ -20,7 +21,7 @@ export default async function AdminPage() {
           }} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-brand-ink/70 mb-2">Mot de passe</label>
-              <input type="password" name="password" className="w-full border-b border-brand-taupe/40 py-3 focus:outline-none focus:border-brand-taupe bg-transparent" required />
+              <PasswordInput />
             </div>
             <button type="submit" className="w-full bg-brand-ink text-brand-paper py-4 text-[10px] uppercase tracking-[0.2em] hover:bg-brand-taupe transition-colors">Se connecter</button>
           </form>
