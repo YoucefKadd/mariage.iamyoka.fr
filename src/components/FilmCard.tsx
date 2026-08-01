@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 
+function extractYouTubeId(url: string) {
+  if (!url) return null;
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
+
 export default function FilmCard({ film }: { film: any }) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const ytId = film.ytId || extractYouTubeId(film.youtubeUrl);
 
   return (
     <div className={`group relative ${film.isMain ? '' : 'flex flex-col'}`}>
@@ -44,10 +52,10 @@ export default function FilmCard({ film }: { film: any }) {
           </div>
         ) : (
           <div className="w-full h-full">
-            {film.ytId ? (
+            {ytId ? (
                 <iframe 
                     className="w-full h-full" 
-                    src={`https://www.youtube-nocookie.com/embed/${film.ytId}?autoplay=1&rel=0&modestbranding=1`} 
+                    src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`} 
                     title={film.title} 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowFullScreen>

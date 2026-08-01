@@ -53,11 +53,16 @@ export async function getMedia() {
     } catch (e) { console.error("Error migrating media:", e); }
   }
 
+  const formattedFilms = films.map(f => ({
+    ...f,
+    ytId: f.youtubeUrl ? extractYouTubeId(f.youtubeUrl) : null
+  }));
+
   return {
     heroVideo: heroSetting?.value || null,
     heroYtId: heroSetting?.value ? extractYouTubeId(heroSetting.value) : null,
     photos,
-    films
+    films: formattedFilms
   };
 }
 
