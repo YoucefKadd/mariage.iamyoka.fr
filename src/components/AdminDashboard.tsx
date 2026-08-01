@@ -579,15 +579,8 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                 setLoading(false);
               }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Fichier Image (PC / Téléphone)</label>
-                  <input 
-                    type="file" 
-                    name="file" 
-                    accept="image/*" 
-                    className="w-full text-xs text-brand-ink border border-brand-sand p-2 bg-brand-paper rounded-xs cursor-pointer file:mr-3 file:py-1 file:px-3 file:border-0 file:text-[10px] file:uppercase file:tracking-widest file:bg-brand-taupe file:text-white file:rounded-xs hover:file:bg-brand-ink mb-2" 
-                  />
-                  <p className="text-[9px] text-brand-ink/40 uppercase tracking-widest mb-1">— OU URL Externe —</p>
-                  <input type="url" name="url" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs" placeholder="https://..." />
+                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Lien URL de l'image</label>
+                  <input type="url" name="url" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs" placeholder="https://..." required />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Titre / Description courte</label>
@@ -868,14 +861,8 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                   <input type="url" name="youtubeUrl" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent" placeholder="https://youtube.com/watch?v=..." required />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Image de couverture (Fichier ou URL)</label>
-                  <input 
-                    type="file" 
-                    name="file" 
-                    accept="image/*" 
-                    className="w-full text-xs text-brand-ink border border-brand-sand p-1.5 bg-brand-paper rounded-xs cursor-pointer file:mr-2 file:py-1 file:px-2 file:border-0 file:text-[9px] file:uppercase file:tracking-widest file:bg-brand-taupe file:text-white file:rounded-xs mb-1" 
-                  />
-                  <input type="url" name="url" className="w-full border-b border-brand-taupe/40 py-1.5 focus:outline-none focus:border-brand-taupe bg-transparent text-xs" placeholder="Laissée vide = générée par YouTube" />
+                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Image de couverture (URL)</label>
+                  <input type="url" name="url" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs" placeholder="Laissée vide = générée par YouTube" />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Titre Principal</label>
@@ -1496,13 +1483,7 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Image (Fichier depuis l'appareil ou URL)</label>
-                <input 
-                  type="file" 
-                  name="file" 
-                  accept="image/*" 
-                  className="w-full text-xs text-brand-ink border border-brand-sand p-2 bg-brand-paper rounded-xs cursor-pointer file:mr-3 file:py-1 file:px-3 file:border-0 file:text-[10px] file:uppercase file:tracking-widest file:bg-brand-taupe file:text-white file:rounded-xs hover:file:bg-brand-ink mb-2" 
-                />
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Image (Lien URL)</label>
                 <input 
                   type="url" 
                   name="url" 
@@ -1611,13 +1592,7 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Changer l'image de couverture</label>
-                <input 
-                  type="file" 
-                  name="file" 
-                  accept="image/*" 
-                  className="w-full text-xs text-brand-ink border border-brand-sand p-1.5 bg-brand-paper rounded-xs cursor-pointer file:mr-2 file:py-1 file:px-2 file:border-0 file:text-[9px] file:uppercase file:tracking-widest file:bg-brand-taupe file:text-white file:rounded-xs mb-1" 
-                />
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Changer l'image de couverture (URL)</label>
                 <input 
                   type="url" 
                   name="url" 
