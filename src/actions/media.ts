@@ -86,16 +86,54 @@ async function processImageUpload(data: FormData): Promise<string | null> {
         console.warn("Sharp fallback:", sharpError);
       }
 
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
+      if (process.env.NODE_ENV !== 'production' && !process.env.HOSTINGER_UPLOAD_URL) {
+        // Local development without Hostinger configuration
+        const filename = `${Date.now()}-${file.name.replace(/\.[^/.]+$/, "")}.webp`;
+        const publicPath = `/uploads/${filename}`;
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        const filePath = path.join(uploadDir, filename);
+        fs.writeFileSync(filePath, buffer);
+        return publicPath;
+      } else if (process.env.HOSTINGER_UPLOAD_URL) {
+        // Upload to Hostinger API
+        const hostingerFormData = new FormData();
+        // Construct a Blob for fetch FormData
+        const blob = new Blob([buffer], { type: 'image/webp' });
+        hostingerFormData.append('file', blob, file.name.replace(/\.[^/.]+$/, "") + '.webp');
+        if (process.env.HOSTINGER_UPLOAD_SECRET) {
+          hostingerFormData.append('secret', process.env.HOSTINGER_UPLOAD_SECRET);
+        }
+        
+        try {
+          const response = await fetch(process.env.HOSTINGER_UPLOAD_URL, {
+            method: 'POST',
+            body: hostingerFormData,
+          });
+          
+          if (!response.ok) {
+             const errText = await response.text();
+             console.error(`Hostinger upload failed: ${response.status} ${errText}`);
+             return null;
+          }
+          
+          const result = await response.json();
+          if (result.success && result.url) {
+             return result.url;
+          } else {
+             console.error(`Invalid response from Hostinger:`, result);
+             return null;
+          }
+        } catch (error) {
+          console.error("Error uploading to Hostinger:", error);
+          return null;
+        }
+      } else {
+        // Netlify Production without Hostinger URL - Fallback to Base64 in MySQL
+        return `data:image/webp;base64,${buffer.toString('base64')}`;
       }
-
-      const filename = `photo-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
-      const filePath = path.join(uploadsDir, filename);
-
-      fs.writeFileSync(filePath, buffer);
-      return `/uploads/${filename}`;
     } catch (err) {
       console.error("Local upload write error, using base64 fallback:", err);
       const rawBytes = await file.arrayBuffer();
