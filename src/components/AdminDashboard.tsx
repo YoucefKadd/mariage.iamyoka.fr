@@ -780,7 +780,10 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                               </button>
                               <button 
                                 type="button"
-                                onClick={async () => await deletePhoto(photo.id)}
+                                onClick={async () => {
+                                  setPhotosList(prev => prev.filter(p => p.id !== photo.id));
+                                  await deletePhoto(photo.id);
+                                }}
                                 className="border border-red-200 text-red-500 w-7 h-7 flex items-center justify-center rounded-sm hover:bg-red-500 hover:text-white transition-colors text-xs ml-1"
                                 title="Supprimer"
                               >
@@ -1092,7 +1095,10 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                               </button>
                               <button 
                                 type="button"
-                                onClick={async () => await deleteFilm(film.id)}
+                                onClick={async () => {
+                                  setFilmsList(prev => prev.filter(f => f.id !== film.id));
+                                  await deleteFilm(film.id);
+                                }}
                                 className="border border-red-200 text-red-500 w-7 h-7 flex items-center justify-center rounded-sm hover:bg-red-500 hover:text-white transition-colors text-xs ml-1"
                                 title="Supprimer"
                               >
