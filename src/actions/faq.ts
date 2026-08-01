@@ -15,8 +15,8 @@ export async function getFaqs() {
         answer: "Nous vous conseillons de nous contacter 9 à 12 mois avant la date de votre mariage. Notre calendrier se remplit rapidement, particulièrement pour la haute saison (de mai à septembre)."
       },
       {
-        question: "Vous déplacez-vous en dehors de Toulouse ?",
-        answer: "Absolument ! Bien que basés à Toulouse, nous adorons voyager. Nous couvrons des mariages dans toute la France et à l'international (les frais de déplacement et d'hébergement seront calculés sur mesure)."
+        question: "Vous déplacez-vous partout en France et à l'étranger ?",
+        answer: "Absolument ! Nous adorons voyager. Nous couvrons des mariages dans toute la France et à l'international (les frais de déplacement et d'hébergement seront calculés sur mesure)."
       },
       {
         question: "Combien de photos ou quelle durée de film allons-nous recevoir ?",
@@ -38,6 +38,21 @@ export async function getFaqs() {
         });
     }
     faqs = await prisma.faqItem.findMany({ orderBy: { order: 'asc' } });
+  } else {
+    // Nettoyage automatique en BDD des anciennes questions contenant Toulouse
+    const toulouseFaqs = faqs.filter(f => f.question.includes("Toulouse") || f.answer.includes("Toulouse"));
+    if (toulouseFaqs.length > 0) {
+      for (const f of toulouseFaqs) {
+        await prisma.faqItem.update({
+          where: { id: f.id },
+          data: {
+            question: f.question.replace("en dehors de Toulouse", "partout en France et à l'étranger").replace("Toulouse", "France"),
+            answer: f.answer.replace("Bien que basés à Toulouse, nous", "Nous").replace("Toulouse", "France")
+          }
+        });
+      }
+      faqs = await prisma.faqItem.findMany({ orderBy: { order: 'asc' } });
+    }
   }
 
   return faqs;

@@ -9,7 +9,7 @@ datasource db {
 
 model Photo {
   id        String   @id @default(cuid())
-  url       String
+  url       String   @db.Text
   title     String
   order     Int      @default(0)
   createdAt DateTime @default(now())
@@ -17,7 +17,7 @@ model Photo {
 
 model Film {
   id         String   @id @default(cuid())
-  url        String?
+  url        String?  @db.Text
   youtubeUrl String
   title      String
   subtitle   String?

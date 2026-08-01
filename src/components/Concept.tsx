@@ -18,7 +18,7 @@ export default function Concept() {
                         Des préparatifs jusqu'au jour J, nous travaillons pour respecter et traduire la vérité du jour où vous vous dites "oui". Pas de poses figées interminables, seulement vos rires francs, la lumière douce d'une fin d'après-midi, et l'intensité d'un regard.
                     </p>
                     <p className="font-medium text-brand-ink mt-8">
-                        Basés à Toulouse. <br/>Disponibles partout en France et à l'international.
+                        Disponibles partout en France et à l'international.
                     </p>
                 </div>
             </div>

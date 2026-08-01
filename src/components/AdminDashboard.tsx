@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from 'react';
-import { addPhoto, deletePhoto, addFilm, deleteFilm, updateHeroVideo, movePhoto, moveFilm } from '@/actions/media';
+import { useState, useRef, useEffect } from 'react';
+import { addPhoto, deletePhoto, addFilm, deleteFilm, updateHeroVideo, movePhoto, moveFilm, updatePhotosOrder, updatePhoto, updateFilmsOrder, updateFilm } from '@/actions/media';
 import { updateQuestion, deleteLeads } from '@/actions/quiz';
 import { addFaq, updateFaq, deleteFaq, moveFaq } from '@/actions/faq';
 import jsPDF from 'jspdf';
@@ -21,6 +21,92 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // State pour la vue et le glisser-déposer de la Galerie Photo
+  const [photoViewMode, setPhotoViewMode] = useState<'grid' | 'table'>('grid');
+  const [photosList, setPhotosList] = useState<any[]>(initialMedia.photos || []);
+  const [draggedPhotoIndex, setDraggedPhotoIndex] = useState<number | null>(null);
+  const [dragOverPhotoIndex, setDragOverPhotoIndex] = useState<number | null>(null);
+  const [editingPhoto, setEditingPhoto] = useState<any>(null);
+
+  // State pour la vue et le glisser-déposer des Films
+  const [filmViewMode, setFilmViewMode] = useState<'grid' | 'table'>('grid');
+  const [filmsList, setFilmsList] = useState<any[]>(initialMedia.films || []);
+  const [draggedFilmIndex, setDraggedFilmIndex] = useState<number | null>(null);
+  const [dragOverFilmIndex, setDragOverFilmIndex] = useState<number | null>(null);
+  const [editingFilm, setEditingFilm] = useState<any>(null);
+
+  useEffect(() => {
+    setPhotosList(initialMedia.photos || []);
+  }, [initialMedia.photos]);
+
+  useEffect(() => {
+    setFilmsList(initialMedia.films || []);
+  }, [initialMedia.films]);
+
+  const handleFilmDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedFilmIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleFilmDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedFilmIndex === null) return;
+    if (dragOverFilmIndex !== index) {
+      setDragOverFilmIndex(index);
+    }
+  };
+
+  const handleFilmDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedFilmIndex === null || draggedFilmIndex === dropIndex) {
+      setDraggedFilmIndex(null);
+      setDragOverFilmIndex(null);
+      return;
+    }
+
+    const newList = [...filmsList];
+    const [movedItem] = newList.splice(draggedFilmIndex, 1);
+    newList.splice(dropIndex, 0, movedItem);
+
+    setFilmsList(newList);
+    setDraggedFilmIndex(null);
+    setDragOverFilmIndex(null);
+
+    await updateFilmsOrder(newList.map(f => f.id));
+  };
+
+  const handlePhotoDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedPhotoIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handlePhotoDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedPhotoIndex === null) return;
+    if (dragOverPhotoIndex !== index) {
+      setDragOverPhotoIndex(index);
+    }
+  };
+
+  const handlePhotoDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedPhotoIndex === null || draggedPhotoIndex === dropIndex) {
+      setDraggedPhotoIndex(null);
+      setDragOverPhotoIndex(null);
+      return;
+    }
+
+    const newList = [...photosList];
+    const [movedItem] = newList.splice(draggedPhotoIndex, 1);
+    newList.splice(dropIndex, 0, movedItem);
+
+    setPhotosList(newList);
+    setDraggedPhotoIndex(null);
+    setDragOverPhotoIndex(null);
+
+    await updatePhotosOrder(newList.map(p => p.id));
+  };
 
   const photoFormRef = useRef<HTMLFormElement>(null);
   const filmFormRef = useRef<HTMLFormElement>(null);
@@ -428,78 +514,275 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
           {/* Header & Bouton Ajouter */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 border border-brand-sand shadow-sm">
              <div>
-                <h2 className="text-xl font-serif">Galerie Photos ({initialMedia.photos.length})</h2>
-                <p className="text-xs text-brand-ink/60 uppercase tracking-widest mt-1">Gérez le portfolio photo</p>
+                <h2 className="text-xl font-serif">Galerie Photos ({photosList.length})</h2>
+                <p className="text-xs text-brand-ink/60 uppercase tracking-widest mt-1">Gérez l'ordre et le portfolio photo par glisser-déposer</p>
              </div>
-             <button 
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="bg-brand-taupe text-white px-6 py-2 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors"
-             >
-                {showAddForm ? 'Fermer' : '+ Ajouter une photo'}
-             </button>
+             
+             <div className="flex flex-wrap items-center gap-3">
+               {/* Sélecteur de vue (Grille / Tableau) */}
+               <div className="flex bg-brand-paper border border-brand-sand p-1 rounded-sm">
+                 <button
+                   type="button"
+                   onClick={() => setPhotoViewMode('grid')}
+                   className={`px-3 py-1.5 text-[10px] uppercase tracking-widest flex items-center space-x-1.5 transition-colors ${photoViewMode === 'grid' ? 'bg-brand-taupe text-white font-bold' : 'text-brand-ink hover:text-brand-taupe'}`}
+                 >
+                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                   </svg>
+                   <span>Vue Grille</span>
+                 </button>
+                 <button
+                   type="button"
+                   onClick={() => setPhotoViewMode('table')}
+                   className={`px-3 py-1.5 text-[10px] uppercase tracking-widest flex items-center space-x-1.5 transition-colors ${photoViewMode === 'table' ? 'bg-brand-taupe text-white font-bold' : 'text-brand-ink hover:text-brand-taupe'}`}
+                 >
+                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                   </svg>
+                   <span>Vue Tableau</span>
+                 </button>
+               </div>
+
+               <button 
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="bg-brand-taupe text-white px-6 py-2 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors"
+               >
+                  {showAddForm ? 'Fermer' : '+ Ajouter une photo'}
+               </button>
+             </div>
           </div>
 
           {/* Formulaire Ajout Photo (Caché par défaut) */}
           {showAddForm && (
             <div className="bg-white p-8 border border-brand-sand shadow-sm animate-[fadeIn_0.3s_ease-out]">
               <h2 className="text-xl font-serif mb-6">Ajouter une nouvelle photo</h2>
-              <form ref={photoFormRef} action={async (fd) => { await handleAddPhoto(fd); setShowAddForm(false); }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form ref={photoFormRef} onSubmit={async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const fd = new FormData(e.currentTarget);
+                await addPhoto(fd);
+                photoFormRef.current?.reset();
+                setShowAddForm(false);
+                setLoading(false);
+              }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">URL de l'image (Unsplash, Cloudinary, etc.)</label>
-                  <input type="url" name="url" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent" required />
+                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Fichier Image (PC / Téléphone)</label>
+                  <input 
+                    type="file" 
+                    name="file" 
+                    accept="image/*" 
+                    className="w-full text-xs text-brand-ink border border-brand-sand p-2 bg-brand-paper rounded-xs cursor-pointer file:mr-3 file:py-1 file:px-3 file:border-0 file:text-[10px] file:uppercase file:tracking-widest file:bg-brand-taupe file:text-white file:rounded-xs hover:file:bg-brand-ink mb-2" 
+                  />
+                  <p className="text-[9px] text-brand-ink/40 uppercase tracking-widest mb-1">— OU URL Externe —</p>
+                  <input type="url" name="url" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs" placeholder="https://..." />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Titre / Description courte</label>
                   <input type="text" name="title" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent" placeholder="Ex: Les Préparatifs" required />
                 </div>
                 <div className="md:col-span-2">
-                  <button type="submit" disabled={loading} className="bg-brand-taupe text-white px-8 py-3 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors disabled:opacity-50">
-                    {loading ? 'Ajout en cours...' : 'Ajouter la photo'}
+                  <button 
+                    type="submit" 
+                    disabled={loading} 
+                    className="inline-flex items-center justify-center space-x-2 bg-brand-taupe text-white px-8 py-3 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors disabled:opacity-50 min-w-[200px]"
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Upload & Compression...</span>
+                      </>
+                    ) : (
+                      <span>Ajouter la photo</span>
+                    )}
                   </button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* Grille des photos actuelles */}
+          {/* Affichage des photos (Grille ou Tableau) */}
           <div className="bg-white p-6 border border-brand-sand shadow-sm">
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-              {initialMedia.photos.map((photo: any, index: number) => (
-                <div key={photo.id} className="relative group bg-white p-2 border border-brand-sand">
-                  <img src={photo.url} alt={photo.title} className="w-full h-40 object-cover" />
-                  <p className="mt-2 text-xs font-medium truncate">{photo.title}</p>
-                  
-                  <div className="absolute top-2 left-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {index > 0 && (
-                      <button 
-                        onClick={async () => await movePhoto(photo.id, 'up')}
-                        className="bg-brand-ink text-white w-8 h-8 flex items-center justify-center rounded-sm hover:bg-brand-taupe shadow-md"
-                        title="Monter"
-                      >
-                        ↑
-                      </button>
-                    )}
-                    {index < initialMedia.photos.length - 1 && (
-                      <button 
-                        onClick={async () => await movePhoto(photo.id, 'down')}
-                        className="bg-brand-ink text-white w-8 h-8 flex items-center justify-center rounded-sm hover:bg-brand-taupe shadow-md"
-                        title="Descendre"
-                      >
-                        ↓
-                      </button>
-                    )}
-                  </div>
+            
+            {photoViewMode === 'grid' ? (
+              /* Vue Grille interactive avec Drag & Drop */
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                {photosList.map((photo: any, index: number) => {
+                  const isDragging = draggedPhotoIndex === index;
+                  const isDragOver = dragOverPhotoIndex === index;
 
-                  <button 
-                    onClick={async () => await deletePhoto(photo.id)}
-                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-                    title="Supprimer"
-                  >
-                    X
-                  </button>
-                </div>
-              ))}
-            </div>
+                  return (
+                    <div 
+                      key={photo.id} 
+                      draggable
+                      onDragStart={(e) => handlePhotoDragStart(e, index)}
+                      onDragOver={(e) => handlePhotoDragOver(e, index)}
+                      onDrop={(e) => handlePhotoDrop(e, index)}
+                      onDragEnd={() => { setDraggedPhotoIndex(null); setDragOverPhotoIndex(null); }}
+                      className={`relative group bg-white p-2 border transition-all cursor-grab active:cursor-grabbing ${
+                        isDragging ? 'opacity-30 scale-95 border-dashed border-brand-taupe' : 
+                        isDragOver ? 'border-brand-taupe ring-2 ring-brand-taupe/50 scale-105 z-10' : 'border-brand-sand hover:border-brand-taupe/50'
+                      }`}
+                    >
+                      {/* Poignée Drag & Drop indicator */}
+                      <div className="absolute top-3 left-3 z-10 bg-brand-ink/80 text-white text-[9px] px-2 py-1 rounded-xs backdrop-blur-xs flex items-center space-x-1 shadow-md">
+                        <span>⋮⋮</span>
+                        <span>#{index + 1}</span>
+                      </div>
+
+                      <img src={photo.url} alt={photo.title} className="w-full h-40 object-cover select-none pointer-events-none" />
+                      <p className="mt-2 text-xs font-medium truncate">{photo.title}</p>
+                      
+                      {/* Actions rapides */}
+                      <div className="absolute bottom-3 right-3 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {index > 0 && (
+                          <button 
+                            type="button"
+                            onClick={async () => await movePhoto(photo.id, 'up')}
+                            className="bg-brand-ink text-white w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe shadow-md text-xs"
+                            title="Monter"
+                          >
+                            ↑
+                          </button>
+                        )}
+                        {index < photosList.length - 1 && (
+                          <button 
+                            type="button"
+                            onClick={async () => await movePhoto(photo.id, 'down')}
+                            className="bg-brand-ink text-white w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe shadow-md text-xs"
+                            title="Descendre"
+                          >
+                            ↓
+                          </button>
+                        )}
+                        <button 
+                          type="button"
+                          onClick={() => setEditingPhoto(photo)}
+                          className="bg-brand-taupe text-white w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-ink shadow-md text-xs"
+                          title="Modifier le titre / lien"
+                        >
+                          ✎
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={async () => await deletePhoto(photo.id)}
+                          className="bg-red-500 text-white w-7 h-7 flex items-center justify-center rounded-sm hover:bg-red-600 shadow-md text-xs"
+                          title="Supprimer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Vue Tableau interactive avec Drag & Drop */
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[700px]">
+                  <thead>
+                    <tr className="border-b border-brand-sand">
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium w-16 text-center">Ordre</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium w-24">Aperçu</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium min-w-[200px]">Titre / Description</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium min-w-[250px]">Lien Image</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium text-right w-28">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {photosList.map((photo: any, index: number) => {
+                      const isDragging = draggedPhotoIndex === index;
+                      const isDragOver = dragOverPhotoIndex === index;
+
+                      return (
+                        <tr 
+                          key={photo.id}
+                          draggable
+                          onDragStart={(e) => handlePhotoDragStart(e, index)}
+                          onDragOver={(e) => handlePhotoDragOver(e, index)}
+                          onDrop={(e) => handlePhotoDrop(e, index)}
+                          onDragEnd={() => { setDraggedPhotoIndex(null); setDragOverPhotoIndex(null); }}
+                          className={`border-b border-brand-sand/50 transition-all cursor-grab active:cursor-grabbing ${
+                            isDragging ? 'opacity-30 bg-brand-sand/40' :
+                            isDragOver ? 'bg-brand-taupe/20 border-t-2 border-b-2 border-brand-taupe' : 'hover:bg-brand-sand/20'
+                          }`}
+                        >
+                          {/* Poignée & Ordre */}
+                          <td className="py-3 px-4 text-center align-middle">
+                            <div className="flex items-center justify-center space-x-1 text-brand-ink/60 font-mono text-xs">
+                              <span className="text-base leading-none select-none text-brand-taupe">⋮⋮</span>
+                              <span>#{index + 1}</span>
+                            </div>
+                          </td>
+
+                          {/* Aperçu */}
+                          <td className="py-3 px-4 align-middle">
+                            <img src={photo.url} alt={photo.title} className="w-16 h-12 object-cover rounded-xs border border-brand-sand pointer-events-none select-none" />
+                          </td>
+
+                          {/* Titre */}
+                          <td className="py-3 px-4 align-middle text-sm font-medium text-brand-ink">
+                            {photo.title}
+                          </td>
+
+                          {/* URL */}
+                          <td className="py-3 px-4 align-middle text-xs text-brand-taupe max-w-xs truncate">
+                            <a href={photo.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                              {photo.url}
+                            </a>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-3 px-4 align-middle text-right">
+                            <div className="flex items-center justify-end space-x-1">
+                              {index > 0 && (
+                                <button 
+                                  type="button"
+                                  onClick={async () => await movePhoto(photo.id, 'up')}
+                                  className="border border-brand-sand text-brand-ink w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe hover:text-white transition-colors text-xs"
+                                  title="Monter"
+                                >
+                                  ↑
+                                </button>
+                              )}
+                              {index < photosList.length - 1 && (
+                                <button 
+                                  type="button"
+                                  onClick={async () => await movePhoto(photo.id, 'down')}
+                                  className="border border-brand-sand text-brand-ink w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe hover:text-white transition-colors text-xs"
+                                  title="Descendre"
+                                >
+                                  ↓
+                                </button>
+                              )}
+                              <button 
+                                type="button"
+                                onClick={() => setEditingPhoto(photo)}
+                                className="border border-brand-taupe text-brand-taupe w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe hover:text-white transition-colors text-xs"
+                                title="Modifier le titre / lien"
+                              >
+                                ✎
+                              </button>
+                              <button 
+                                type="button"
+                                onClick={async () => await deletePhoto(photo.id)}
+                                className="border border-red-200 text-red-500 w-7 h-7 flex items-center justify-center rounded-sm hover:bg-red-500 hover:text-white transition-colors text-xs ml-1"
+                                title="Supprimer"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
           </div>
         </div>
       )}
@@ -509,29 +792,70 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
           {/* Header & Bouton Ajouter */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 border border-brand-sand shadow-sm">
              <div>
-                <h2 className="text-xl font-serif">Films de Mariage ({initialMedia.films.length})</h2>
-                <p className="text-xs text-brand-ink/60 uppercase tracking-widest mt-1">Gérez le portfolio vidéo</p>
+                <h2 className="text-xl font-serif">Films de Mariage ({filmsList.length})</h2>
+                <p className="text-xs text-brand-ink/60 uppercase tracking-widest mt-1">Gérez l'ordre et le portfolio vidéo par glisser-déposer</p>
              </div>
-             <button 
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="bg-brand-taupe text-white px-6 py-2 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors"
-             >
-                {showAddForm ? 'Fermer' : '+ Ajouter un film'}
-             </button>
+             
+             <div className="flex flex-wrap items-center gap-3">
+               {/* Sélecteur de vue (Grille / Tableau) */}
+               <div className="flex bg-brand-paper border border-brand-sand p-1 rounded-sm">
+                 <button
+                   type="button"
+                   onClick={() => setFilmViewMode('grid')}
+                   className={`px-3 py-1.5 text-[10px] uppercase tracking-widest flex items-center space-x-1.5 transition-colors ${filmViewMode === 'grid' ? 'bg-brand-taupe text-white font-bold' : 'text-brand-ink hover:text-brand-taupe'}`}
+                 >
+                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                   </svg>
+                   <span>Vue Grille</span>
+                 </button>
+                 <button
+                   type="button"
+                   onClick={() => setFilmViewMode('table')}
+                   className={`px-3 py-1.5 text-[10px] uppercase tracking-widest flex items-center space-x-1.5 transition-colors ${filmViewMode === 'table' ? 'bg-brand-taupe text-white font-bold' : 'text-brand-ink hover:text-brand-taupe'}`}
+                 >
+                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                   </svg>
+                   <span>Vue Tableau</span>
+                 </button>
+               </div>
+
+               <button 
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="bg-brand-taupe text-white px-6 py-2 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors"
+               >
+                  {showAddForm ? 'Fermer' : '+ Ajouter un film'}
+               </button>
+             </div>
           </div>
 
           {/* Formulaire Ajout Film */}
           {showAddForm && (
             <div className="bg-white p-8 border border-brand-sand shadow-sm animate-[fadeIn_0.3s_ease-out]">
               <h2 className="text-xl font-serif mb-6">Ajouter un nouveau film</h2>
-              <form ref={filmFormRef} action={async (fd) => { await handleAddFilm(fd); setShowAddForm(false); }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form ref={filmFormRef} onSubmit={async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const fd = new FormData(e.currentTarget);
+                await addFilm(fd);
+                filmFormRef.current?.reset();
+                setShowAddForm(false);
+                setLoading(false);
+              }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Lien YouTube de la vidéo</label>
                   <input type="url" name="youtubeUrl" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent" placeholder="https://youtube.com/watch?v=..." required />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Image de couverture (Optionnel)</label>
-                  <input type="url" name="url" className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent" placeholder="Laissée vide, elle sera générée" />
+                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Image de couverture (Fichier ou URL)</label>
+                  <input 
+                    type="file" 
+                    name="file" 
+                    accept="image/*" 
+                    className="w-full text-xs text-brand-ink border border-brand-sand p-1.5 bg-brand-paper rounded-xs cursor-pointer file:mr-2 file:py-1 file:px-2 file:border-0 file:text-[9px] file:uppercase file:tracking-widest file:bg-brand-taupe file:text-white file:rounded-xs mb-1" 
+                  />
+                  <input type="url" name="url" className="w-full border-b border-brand-taupe/40 py-1.5 focus:outline-none focus:border-brand-taupe bg-transparent text-xs" placeholder="Laissée vide = générée par YouTube" />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Titre Principal</label>
@@ -550,59 +874,232 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                   <label htmlFor="isMain" className="text-sm font-medium">Film mis en avant (Sera affiché en grand format)</label>
                 </div>
                 <div className="md:col-span-2">
-                  <button type="submit" disabled={loading} className="bg-brand-taupe text-white px-8 py-3 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors disabled:opacity-50">
-                    {loading ? 'Ajout en cours...' : 'Ajouter le film'}
+                  <button 
+                    type="submit" 
+                    disabled={loading} 
+                    className="inline-flex items-center justify-center space-x-2 bg-brand-taupe text-white px-8 py-3 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors disabled:opacity-50 min-w-[200px]"
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Upload & Traitement...</span>
+                      </>
+                    ) : (
+                      <span>Ajouter le film</span>
+                    )}
                   </button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* Liste des films actuels */}
+          {/* Affichage des films (Grille ou Tableau) */}
           <div className="bg-white p-6 border border-brand-sand shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {initialMedia.films.map((film: any, index: number) => (
-                <div key={film.id} className="relative group bg-white p-2 border border-brand-sand">
-                  <div className="relative">
-                    <img src={film.url} alt={film.title} className="w-full h-40 object-cover" />
-                    {film.isMain && <span className="absolute top-2 right-2 bg-brand-taupe text-white text-[8px] uppercase px-2 py-1">À la une</span>}
-                  </div>
-                  <div className="p-3">
-                    <p className="font-serif text-lg">{film.title}</p>
-                    <p className="text-xs text-brand-ink/60">{film.subtitle}</p>
-                  </div>
-                  
-                  <div className="absolute top-2 left-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {index > 0 && (
-                      <button 
-                        onClick={async () => await moveFilm(film.id, 'up')}
-                        className="bg-brand-ink text-white w-8 h-8 flex items-center justify-center rounded-sm hover:bg-brand-taupe shadow-md"
-                        title="Monter"
-                      >
-                        ↑
-                      </button>
-                    )}
-                    {index < initialMedia.films.length - 1 && (
-                      <button 
-                        onClick={async () => await moveFilm(film.id, 'down')}
-                        className="bg-brand-ink text-white w-8 h-8 flex items-center justify-center rounded-sm hover:bg-brand-taupe shadow-md"
-                        title="Descendre"
-                      >
-                        ↓
-                      </button>
-                    )}
-                  </div>
+            {filmViewMode === 'grid' ? (
+              /* Vue Grille interactive avec Drag & Drop */
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filmsList.map((film: any, index: number) => {
+                  const isDragging = draggedFilmIndex === index;
+                  const isDragOver = dragOverFilmIndex === index;
 
-                  <button 
-                    onClick={async () => await deleteFilm(film.id)}
-                    className="absolute bottom-4 right-4 bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-                    title="Supprimer"
-                  >
-                    X
-                  </button>
-                </div>
-              ))}
-            </div>
+                  return (
+                    <div 
+                      key={film.id}
+                      draggable
+                      onDragStart={(e) => handleFilmDragStart(e, index)}
+                      onDragOver={(e) => handleFilmDragOver(e, index)}
+                      onDrop={(e) => handleFilmDrop(e, index)}
+                      onDragEnd={() => { setDraggedFilmIndex(null); setDragOverFilmIndex(null); }}
+                      className={`relative group bg-white p-2 border transition-all cursor-grab active:cursor-grabbing ${
+                        isDragging ? 'opacity-30 scale-95 border-dashed border-brand-taupe' : 
+                        isDragOver ? 'border-brand-taupe ring-2 ring-brand-taupe/50 scale-105 z-10' : 'border-brand-sand hover:border-brand-taupe/50'
+                      }`}
+                    >
+                      {/* Poignée Drag & Drop indicator */}
+                      <div className="absolute top-3 left-3 z-10 bg-brand-ink/80 text-white text-[9px] px-2 py-1 rounded-xs backdrop-blur-xs flex items-center space-x-1 shadow-md">
+                        <span>⋮⋮</span>
+                        <span>#{index + 1}</span>
+                      </div>
+
+                      <div className="relative">
+                        <img src={film.url} alt={film.title} className="w-full h-40 object-cover select-none pointer-events-none" />
+                        {film.isMain && <span className="absolute top-2 right-2 bg-brand-taupe text-white text-[8px] uppercase px-2 py-1 shadow-xs">À la une</span>}
+                        {film.badge && <span className="absolute bottom-2 left-2 bg-black/60 text-white text-[8px] uppercase px-2 py-0.5 backdrop-blur-xs">{film.badge}</span>}
+                      </div>
+
+                      <div className="p-3">
+                        <p className="font-serif text-lg text-brand-ink">{film.title}</p>
+                        <p className="text-xs text-brand-ink/60">{film.subtitle}</p>
+                      </div>
+                      
+                      {/* Actions rapides */}
+                      <div className="absolute top-3 right-3 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {index > 0 && (
+                          <button 
+                            type="button"
+                            onClick={async () => await moveFilm(film.id, 'up')}
+                            className="bg-brand-ink text-white w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe shadow-md text-xs"
+                            title="Monter"
+                          >
+                            ↑
+                          </button>
+                        )}
+                        {index < filmsList.length - 1 && (
+                          <button 
+                            type="button"
+                            onClick={async () => await moveFilm(film.id, 'down')}
+                            className="bg-brand-ink text-white w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe shadow-md text-xs"
+                            title="Descendre"
+                          >
+                            ↓
+                          </button>
+                        )}
+                        <button 
+                          type="button"
+                          onClick={() => setEditingFilm(film)}
+                          className="bg-brand-taupe text-white w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-ink shadow-md text-xs"
+                          title="Modifier le film"
+                        >
+                          ✎
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={async () => await deleteFilm(film.id)}
+                          className="bg-red-500 text-white w-7 h-7 flex items-center justify-center rounded-sm hover:bg-red-600 shadow-md text-xs"
+                          title="Supprimer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Vue Tableau interactive avec Drag & Drop */
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[750px]">
+                  <thead>
+                    <tr className="border-b border-brand-sand">
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium w-16 text-center">Ordre</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium w-24">Vignette</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium min-w-[180px]">Film & Lieu</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium min-w-[220px]">Lien YouTube</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium w-28 text-center">Statut</th>
+                      <th className="py-3 px-4 text-[10px] uppercase tracking-widest text-brand-ink/50 font-medium text-right w-28">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filmsList.map((film: any, index: number) => {
+                      const isDragging = draggedFilmIndex === index;
+                      const isDragOver = dragOverFilmIndex === index;
+
+                      return (
+                        <tr 
+                          key={film.id}
+                          draggable
+                          onDragStart={(e) => handleFilmDragStart(e, index)}
+                          onDragOver={(e) => handleFilmDragOver(e, index)}
+                          onDrop={(e) => handleFilmDrop(e, index)}
+                          onDragEnd={() => { setDraggedFilmIndex(null); setDragOverFilmIndex(null); }}
+                          className={`border-b border-brand-sand/50 transition-all cursor-grab active:cursor-grabbing ${
+                            isDragging ? 'opacity-30 bg-brand-sand/40' :
+                            isDragOver ? 'bg-brand-taupe/20 border-t-2 border-b-2 border-brand-taupe' : 'hover:bg-brand-sand/20'
+                          }`}
+                        >
+                          {/* Poignée & Ordre */}
+                          <td className="py-3 px-4 text-center align-middle">
+                            <div className="flex items-center justify-center space-x-1 text-brand-ink/60 font-mono text-xs">
+                              <span className="text-base leading-none select-none text-brand-taupe">⋮⋮</span>
+                              <span>#{index + 1}</span>
+                            </div>
+                          </td>
+
+                          {/* Aperçu */}
+                          <td className="py-3 px-4 align-middle">
+                            <img src={film.url} alt={film.title} className="w-16 h-10 object-cover rounded-xs border border-brand-sand pointer-events-none select-none" />
+                          </td>
+
+                          {/* Titre & Sous-titre */}
+                          <td className="py-3 px-4 align-middle">
+                            <p className="text-sm font-serif font-bold text-brand-ink">{film.title}</p>
+                            {film.subtitle && <p className="text-xs text-brand-ink/60">{film.subtitle}</p>}
+                          </td>
+
+                          {/* Lien YouTube */}
+                          <td className="py-3 px-4 align-middle text-xs text-brand-taupe max-w-xs truncate">
+                            <a href={film.youtubeUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                              {film.youtubeUrl}
+                            </a>
+                          </td>
+
+                          {/* Statut & Badge */}
+                          <td className="py-3 px-4 align-middle text-center">
+                            <div className="flex flex-col items-center space-y-1">
+                              {film.isMain && (
+                                <span className="bg-brand-taupe text-white text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-full font-medium">
+                                  À la une
+                                </span>
+                              )}
+                              {film.badge && (
+                                <span className="bg-brand-sand text-brand-ink text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-full font-medium">
+                                  {film.badge}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-3 px-4 align-middle text-right">
+                            <div className="flex items-center justify-end space-x-1">
+                              {index > 0 && (
+                                <button 
+                                  type="button"
+                                  onClick={async () => await moveFilm(film.id, 'up')}
+                                  className="border border-brand-sand text-brand-ink w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe hover:text-white transition-colors text-xs"
+                                  title="Monter"
+                                >
+                                  ↑
+                                </button>
+                              )}
+                              {index < filmsList.length - 1 && (
+                                <button 
+                                  type="button"
+                                  onClick={async () => await moveFilm(film.id, 'down')}
+                                  className="border border-brand-sand text-brand-ink w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe hover:text-white transition-colors text-xs"
+                                  title="Descendre"
+                                >
+                                  ↓
+                                </button>
+                              )}
+                              <button 
+                                type="button"
+                                onClick={() => setEditingFilm(film)}
+                                className="border border-brand-taupe text-brand-taupe w-7 h-7 flex items-center justify-center rounded-sm hover:bg-brand-taupe hover:text-white transition-colors text-xs"
+                                title="Modifier le film"
+                              >
+                                ✎
+                              </button>
+                              <button 
+                                type="button"
+                                onClick={async () => await deleteFilm(film.id)}
+                                className="border border-red-200 text-red-500 w-7 h-7 flex items-center justify-center rounded-sm hover:bg-red-500 hover:text-white transition-colors text-xs ml-1"
+                                title="Supprimer"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -941,6 +1438,212 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                   className="flex-1 bg-red-500 text-white py-2.5 text-[10px] uppercase tracking-widest hover:bg-red-600 transition-colors disabled:opacity-50"
                 >
                   {deleteLoading ? 'Vérification...' : 'Confirmer la suppression'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal d'édition d'une photo */}
+      {editingPhoto && (
+        <div className="fixed inset-0 bg-brand-ink/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white p-8 max-w-lg w-full border border-brand-sand shadow-2xl space-y-6">
+            <div>
+              <h3 className="text-xl font-serif text-brand-ink mb-1">Modifier la photo</h3>
+              <p className="text-xs text-brand-ink/60 uppercase tracking-widest">Modifiez le titre et le lien de l'image</p>
+            </div>
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setLoading(true);
+              const fd = new FormData(e.currentTarget);
+              await updatePhoto(fd);
+              setEditingPhoto(null);
+              setLoading(false);
+            }} className="space-y-6">
+              <input type="hidden" name="id" value={editingPhoto.id} />
+              
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Titre / Description courte</label>
+                <input 
+                  type="text" 
+                  name="title" 
+                  defaultValue={editingPhoto.title} 
+                  className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-sm font-medium" 
+                  required 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Image (Fichier depuis l'appareil ou URL)</label>
+                <input 
+                  type="file" 
+                  name="file" 
+                  accept="image/*" 
+                  className="w-full text-xs text-brand-ink border border-brand-sand p-2 bg-brand-paper rounded-xs cursor-pointer file:mr-3 file:py-1 file:px-3 file:border-0 file:text-[10px] file:uppercase file:tracking-widest file:bg-brand-taupe file:text-white file:rounded-xs hover:file:bg-brand-ink mb-2" 
+                />
+                <input 
+                  type="url" 
+                  name="url" 
+                  defaultValue={editingPhoto.url} 
+                  className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs text-brand-taupe" 
+                  placeholder="https://..." 
+                />
+                {editingPhoto.url && (
+                  <div className="mt-4">
+                    <p className="text-[10px] uppercase tracking-widest text-brand-ink/40 mb-1">Aperçu actuel :</p>
+                    <img src={editingPhoto.url} alt="Aperçu" className="w-full h-40 object-cover border border-brand-sand rounded-xs shadow-xs" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex space-x-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setEditingPhoto(null)} 
+                  className="flex-1 border border-brand-sand py-2.5 text-[10px] uppercase tracking-widest text-brand-ink hover:bg-brand-sand/30 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={loading} 
+                  className="flex-1 inline-flex items-center justify-center space-x-2 bg-brand-taupe text-white py-2.5 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Enregistrement...</span>
+                    </>
+                  ) : (
+                    <span>Enregistrer</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal d'édition d'un film */}
+      {editingFilm && (
+        <div className="fixed inset-0 bg-brand-ink/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white p-8 max-w-xl w-full border border-brand-sand shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            <div>
+              <h3 className="text-xl font-serif text-brand-ink mb-1">Modifier le film</h3>
+              <p className="text-xs text-brand-ink/60 uppercase tracking-widest">Modifiez les informations et liens de la vidéo</p>
+            </div>
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setLoading(true);
+              const fd = new FormData(e.currentTarget);
+              await updateFilm(fd);
+              setEditingFilm(null);
+              setLoading(false);
+            }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <input type="hidden" name="id" value={editingFilm.id} />
+              
+              <div className="md:col-span-2">
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Lien YouTube de la vidéo *</label>
+                <input 
+                  type="url" 
+                  name="youtubeUrl" 
+                  defaultValue={editingFilm.youtubeUrl} 
+                  className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs text-brand-taupe font-mono" 
+                  required 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Titre Principal *</label>
+                <input 
+                  type="text" 
+                  name="title" 
+                  defaultValue={editingFilm.title} 
+                  className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-sm font-medium" 
+                  required 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Sous-titre (Lieu / Type)</label>
+                <input 
+                  type="text" 
+                  name="subtitle" 
+                  defaultValue={editingFilm.subtitle || ''} 
+                  className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-sm" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Badge (Optionnel)</label>
+                <input 
+                  type="text" 
+                  name="badge" 
+                  defaultValue={editingFilm.badge || ''} 
+                  className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Changer l'image de couverture</label>
+                <input 
+                  type="file" 
+                  name="file" 
+                  accept="image/*" 
+                  className="w-full text-xs text-brand-ink border border-brand-sand p-1.5 bg-brand-paper rounded-xs cursor-pointer file:mr-2 file:py-1 file:px-2 file:border-0 file:text-[9px] file:uppercase file:tracking-widest file:bg-brand-taupe file:text-white file:rounded-xs mb-1" 
+                />
+                <input 
+                  type="url" 
+                  name="url" 
+                  defaultValue={editingFilm.url || ''} 
+                  className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs text-brand-taupe" 
+                  placeholder="Laissez vide pour générer automatiquement"
+                />
+              </div>
+
+              <div className="md:col-span-2 flex items-center space-x-3 bg-brand-paper p-3 border border-brand-sand rounded-xs">
+                <input 
+                  type="checkbox" 
+                  name="isMain" 
+                  id="editIsMain" 
+                  defaultChecked={editingFilm.isMain} 
+                  className="w-4 h-4 text-brand-taupe accent-brand-taupe" 
+                />
+                <label htmlFor="editIsMain" className="text-xs font-medium text-brand-ink">
+                  Film mis en avant (Sera affiché en grand format sur la page d'accueil)
+                </label>
+              </div>
+
+              <div className="md:col-span-2 flex space-x-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setEditingFilm(null)} 
+                  className="flex-1 border border-brand-sand py-2.5 text-[10px] uppercase tracking-widest text-brand-ink hover:bg-brand-sand/30 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={loading} 
+                  className="flex-1 inline-flex items-center justify-center space-x-2 bg-brand-taupe text-white py-2.5 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Enregistrement...</span>
+                    </>
+                  ) : (
+                    <span>Enregistrer les modifications</span>
+                  )}
                 </button>
               </div>
             </form>

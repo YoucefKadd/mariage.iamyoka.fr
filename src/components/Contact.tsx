@@ -9,10 +9,12 @@ export default function Contact() {
   const [errorMsg, setErrorMsg] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setIsPending(true);
     setStatus('idle');
     
+    const formData = new FormData(e.currentTarget);
     const result = await submitContactForm(formData);
     
     if (result?.error) {
@@ -40,7 +42,7 @@ export default function Contact() {
                 </a>
             </div>
             
-            <form ref={formRef} action={handleSubmit} className="space-y-8 fade-in-up max-w-2xl mx-auto">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-8 fade-in-up max-w-2xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="relative">
                         <input type="text" id="name" name="name" required className="w-full bg-transparent border-b border-brand-taupe/40 py-3 text-sm focus:outline-none focus:border-brand-taupe transition-colors peer placeholder-transparent" placeholder="Votre nom" />
@@ -98,9 +100,19 @@ export default function Contact() {
                     <button 
                         type="submit" 
                         disabled={isPending}
-                        className="inline-block bg-brand-taupe text-brand-ink px-12 py-4 text-[10px] uppercase tracking-[0.2em] hover:bg-brand-paper transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center justify-center space-x-3 bg-brand-taupe text-brand-ink px-12 py-4 text-[10px] uppercase tracking-[0.2em] hover:bg-brand-paper transition-colors duration-300 disabled:opacity-75 disabled:cursor-not-allowed min-w-[240px]"
                     >
-                        {isPending ? "Envoi en cours..." : "Envoyer le message"}
+                        {isPending ? (
+                            <>
+                                <svg className="animate-spin h-4 w-4 text-brand-ink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Envoi en cours...</span>
+                            </>
+                        ) : (
+                            <span>Envoyer le message</span>
+                        )}
                     </button>
                 </div>
             </form>

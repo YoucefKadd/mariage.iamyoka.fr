@@ -61,14 +61,62 @@ export async function getMedia() {
   };
 }
 
+async function processImageUpload(data: FormData): Promise<string | null> {
+  const file = data.get('file') as File | null;
+  const urlInput = data.get('url') as string | null;
+
+  if (file && file.size > 0 && file.name) {
+    try {
+      const rawBytes = await file.arrayBuffer();
+      let buffer = Buffer.from(rawBytes);
+
+      // Compression & Optimisation automatique de l'image avec Sharp (WebP @ 82% qualité, max 2000px)
+      try {
+        const sharp = require('sharp');
+        buffer = await sharp(buffer)
+          .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 82 })
+          .toBuffer();
+      } catch (sharpError) {
+        console.warn("Sharp fallback:", sharpError);
+      }
+
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      const filename = `photo-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
+      const filePath = path.join(uploadsDir, filename);
+
+      fs.writeFileSync(filePath, buffer);
+      return `/uploads/${filename}`;
+    } catch (err) {
+      console.error("Local upload write error, using base64 fallback:", err);
+      const rawBytes = await file.arrayBuffer();
+      let buffer = Buffer.from(rawBytes);
+      try {
+        const sharp = require('sharp');
+        buffer = await sharp(buffer)
+          .resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toBuffer();
+      } catch (e) {}
+      return `data:image/webp;base64,${buffer.toString('base64')}`;
+    }
+  }
+
+  return urlInput || null;
+}
+
 export async function addPhoto(data: FormData) {
-  const url = data.get('url') as string;
+  const finalUrl = await processImageUpload(data);
   const title = data.get('title') as string;
-  if (!url) return { error: "URL is required" };
+  if (!finalUrl) return { error: "Une image (fichier ou lien URL) est obligatoire" };
 
   const count = await prisma.photo.count();
   await prisma.photo.create({
-    data: { url, title, order: count }
+    data: { url: finalUrl, title: title || '', order: count }
   });
 
   revalidatePath('/');
@@ -83,6 +131,23 @@ export async function deletePhoto(id: string) {
   return { success: true };
 }
 
+export async function updatePhoto(data: FormData) {
+  const id = data.get('id') as string;
+  const finalUrl = await processImageUpload(data);
+  const title = data.get('title') as string;
+
+  if (!id || !finalUrl) return { error: "L'identifiant et l'image sont obligatoires" };
+
+  await prisma.photo.update({
+    where: { id },
+    data: { url: finalUrl, title: title || '' }
+  });
+
+  revalidatePath('/');
+  revalidatePath('/admin');
+  return { success: true };
+}
+
 function extractYouTubeId(url: string) {
   const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
   const match = url.match(regex);
@@ -90,7 +155,7 @@ function extractYouTubeId(url: string) {
 }
 
 export async function addFilm(data: FormData) {
-  const url = data.get('url') as string;
+  const uploadedUrl = await processImageUpload(data);
   const youtubeUrl = data.get('youtubeUrl') as string;
   const title = data.get('title') as string;
   const subtitle = data.get('subtitle') as string;
@@ -99,7 +164,7 @@ export async function addFilm(data: FormData) {
 
   if (!youtubeUrl || !title) return { error: "YouTube URL and Title are required" };
 
-  let finalUrl = url;
+  let finalUrl = uploadedUrl;
   if (!finalUrl) {
       const ytId = extractYouTubeId(youtubeUrl);
       if (ytId) {
@@ -191,6 +256,76 @@ export async function moveFilm(id: string, direction: 'up' | 'down') {
       prisma.film.update({ where: { id: films[index + 1].id }, data: { order: index } })
     ]);
   }
+
+  revalidatePath('/');
+  revalidatePath('/admin');
+  return { success: true };
+}
+
+export async function updatePhotosOrder(orderedIds: string[]) {
+  if (!orderedIds || orderedIds.length === 0) return { error: "No IDs provided" };
+
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.photo.update({
+        where: { id },
+        data: { order: index }
+      })
+    )
+  );
+
+  revalidatePath('/');
+  revalidatePath('/admin');
+  return { success: true };
+}
+
+export async function updateFilmsOrder(orderedIds: string[]) {
+  if (!orderedIds || orderedIds.length === 0) return { error: "No IDs provided" };
+
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.film.update({
+        where: { id },
+        data: { order: index }
+      })
+    )
+  );
+
+  revalidatePath('/');
+  revalidatePath('/admin');
+  return { success: true };
+}
+
+export async function updateFilm(data: FormData) {
+  const id = data.get('id') as string;
+  const youtubeUrl = data.get('youtubeUrl') as string;
+  const uploadedUrl = await processImageUpload(data);
+  const title = data.get('title') as string;
+  const subtitle = data.get('subtitle') as string;
+  const badge = data.get('badge') as string;
+  const isMain = data.get('isMain') === 'on';
+
+  if (!id || !youtubeUrl || !title) return { error: "ID, YouTube URL and Title are required" };
+
+  let finalUrl = uploadedUrl;
+  if (!finalUrl) {
+    const ytId = extractYouTubeId(youtubeUrl);
+    if (ytId) {
+      finalUrl = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+    }
+  }
+
+  await prisma.film.update({
+    where: { id },
+    data: {
+      youtubeUrl,
+      url: finalUrl || null,
+      title,
+      subtitle: subtitle || null,
+      badge: badge || null,
+      isMain
+    }
+  });
 
   revalidatePath('/');
   revalidatePath('/admin');

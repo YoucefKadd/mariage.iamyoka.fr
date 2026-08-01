@@ -17,7 +17,7 @@ export default function Footer() {
         </div>
         <div className="text-[10px] uppercase tracking-widest text-brand-paper/50 text-center md:text-right">
           © {new Date().getFullYear()} IAMYOKA. Tous droits réservés.<br/>
-          Basé à Toulouse, France.
+          Basé en France & à l'international.
         </div>
       </div>
     </footer>
