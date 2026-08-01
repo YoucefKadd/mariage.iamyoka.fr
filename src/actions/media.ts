@@ -77,13 +77,13 @@ export async function addPhoto(data: FormData) {
   if (!finalUrl) return { error: "Une image (fichier ou lien URL) est obligatoire" };
 
   const count = await prisma.photo.count();
-  await prisma.photo.create({
+  const newPhoto = await prisma.photo.create({
     data: { url: finalUrl, title: title || '', order: count }
   });
 
   revalidatePath('/');
   revalidatePath('/admin');
-  return { success: true };
+  return { success: true, photo: newPhoto };
 }
 
 export async function deletePhoto(id: string) {
@@ -122,7 +122,6 @@ function extractYouTubeId(url: string) {
 }
 
 export async function addFilm(data: FormData) {
-  const uploadedUrl = await processImageUpload(data);
   const youtubeUrl = data.get('youtubeUrl') as string;
   const title = data.get('title') as string;
   const subtitle = data.get('subtitle') as string;
@@ -131,7 +130,7 @@ export async function addFilm(data: FormData) {
 
   if (!youtubeUrl || !title) return { error: "YouTube URL and Title are required" };
 
-  let finalUrl = uploadedUrl;
+  let finalUrl = data.get('url') as string | null;
   if (!finalUrl) {
       const ytId = extractYouTubeId(youtubeUrl);
       if (ytId) {
@@ -140,21 +139,21 @@ export async function addFilm(data: FormData) {
   }
 
   const count = await prisma.film.count();
-  await prisma.film.create({
+  const newFilm = await prisma.film.create({
     data: {
-      url: finalUrl,
       youtubeUrl,
       title,
-      subtitle,
-      badge,
+      subtitle: subtitle || null,
+      badge: badge || null,
       isMain,
+      url: finalUrl || '',
       order: count
     }
   });
 
   revalidatePath('/');
   revalidatePath('/admin');
-  return { success: true };
+  return { success: true, film: newFilm };
 }
 
 export async function deleteFilm(id: string) {

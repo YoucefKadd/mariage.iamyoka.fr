@@ -572,11 +572,22 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
               <form ref={photoFormRef} onSubmit={async (e) => {
                 e.preventDefault();
                 setLoading(true);
-                const fd = new FormData(e.currentTarget);
-                await addPhoto(fd);
-                photoFormRef.current?.reset();
-                setShowAddForm(false);
-                setLoading(false);
+                try {
+                  const fd = new FormData(e.currentTarget);
+                  const res = await addPhoto(fd);
+                  if (res?.success && res.photo) {
+                    setPhotosList(prev => [...prev, res.photo]);
+                    photoFormRef.current?.reset();
+                    setShowAddForm(false);
+                  } else if (res?.error) {
+                    alert(res.error);
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert("Une erreur est survenue.");
+                } finally {
+                  setLoading(false);
+                }
               }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Lien URL de l'image</label>
@@ -598,7 +609,7 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span>Upload & Compression...</span>
+                        <span>Sauvegarde...</span>
                       </>
                     ) : (
                       <span>Ajouter la photo</span>
@@ -853,11 +864,22 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
               <form ref={filmFormRef} onSubmit={async (e) => {
                 e.preventDefault();
                 setLoading(true);
-                const fd = new FormData(e.currentTarget);
-                await addFilm(fd);
-                filmFormRef.current?.reset();
-                setShowAddForm(false);
-                setLoading(false);
+                try {
+                  const fd = new FormData(e.currentTarget);
+                  const res = await addFilm(fd);
+                  if (res?.success && res.film) {
+                    setFilmsList(prev => [...prev, res.film]);
+                    filmFormRef.current?.reset();
+                    setShowAddForm(false);
+                  } else if (res?.error) {
+                    alert(res.error);
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert("Une erreur est survenue.");
+                } finally {
+                  setLoading(false);
+                }
               }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2">Lien YouTube de la vidéo</label>
@@ -895,7 +917,7 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span>Upload & Traitement...</span>
+                        <span>Sauvegarde...</span>
                       </>
                     ) : (
                       <span>Ajouter le film</span>
