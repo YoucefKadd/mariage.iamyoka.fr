@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/prisma';
 import nodemailer from 'nodemailer';
+import { revalidatePath } from 'next/cache';
 
 export async function submitContactForm(data: FormData) {
   const names = data.get('name') as string;
