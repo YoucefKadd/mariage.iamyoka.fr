@@ -50,7 +50,7 @@ export default async function AdminPage() {
         </form>
       </header>
       
-      <main className="max-w-7xl mx-auto py-12 px-6 md:px-12">
+      <main className="w-full mx-auto py-12 px-4 md:px-8">
         <AdminDashboard initialMedia={media} initialQuiz={quiz} initialLeads={leads} initialFaqs={faqs} initialEmailSettings={emailSettings} />
       </main>
     </div>
