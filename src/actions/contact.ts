@@ -101,16 +101,34 @@ export async function submitContactForm(data: FormData) {
       `
     };
 
+    const emailSettings = await getEmailSettings();
+
+    const formattedSubject = emailSettings.subject
+      .replace(/{{nom}}/g, names);
+
+    const formattedIntro = emailSettings.introText
+      .replace(/{{nom}}/g, names)
+      .replace(/{{email}}/g, email)
+      .replace(/{{date}}/g, date || 'Non précisée')
+      .replace(/{{lieu}}/g, location || 'Non précisé')
+      .replace(/{{services}}/g, servicesText)
+      .replace(/\n/g, '<br/>');
+
+    const formattedClosing = emailSettings.closingText
+      .replace(/{{nom}}/g, names)
+      .replace(/\n/g, '<br/>');
+
     const autoReplyOptions = {
       from: `"Iamyoka" <${process.env.SMTP_USER}>`,
       to: email, // L'adresse du client
-      subject: `Votre demande de contact - Iamyoka`,
-      text: `Bonjour ${names},\n\nNous avons bien reçu votre message et nous vous en remercions infiniment.\n\nNous allons étudier votre demande avec soin et reviendrons vers vous très prochainement pour en discuter de vive voix.\n\n--- Récapitulatif de votre demande ---\nNoms : ${names}\nTéléphone : ${phone || 'Non précisé'}\nDate : ${date || 'Non précisée'}\nLieu : ${location || 'Non précisé'}\nServices souhaités : ${servicesText}\nMessage :\n${message}\n\nÀ très vite,\nL'équipe Iamyoka.\n\n--\nSite Web: https://iamyoka.fr`,
+      subject: formattedSubject,
+      text: `${emailSettings.introText.replace(/{{nom}}/g, names)}\n\n--- Récapitulatif de votre demande ---\nNoms : ${names}\nTéléphone : ${phone || 'Non précisé'}\nDate : ${date || 'Non précisée'}\nLieu : ${location || 'Non précisé'}\nServices souhaités : ${servicesText}\nMessage :\n${message}\n\n${emailSettings.closingText.replace(/{{nom}}/g, names)}`,
       html: `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="font-weight: 300; letter-spacing: 1px; color: #333;">Bonjour ${names},</h2>
-          <p style="line-height: 1.6; color: #444;">Nous avons bien reçu votre message concernant votre mariage et nous vous en remercions infiniment.</p>
-          <p style="line-height: 1.6; color: #444;">Nous allons étudier votre demande avec soin et reviendrons vers vous très prochainement pour en discuter de vive voix.</p>
+          <div style="line-height: 1.6; color: #444; margin-bottom: 25px;">
+            ${formattedIntro}
+          </div>
           
           <div style="background-color: #f9f9f9; padding: 25px; border-radius: 4px; margin: 30px 0; border: 1px solid #eee;">
             <h3 style="margin-top: 0; margin-bottom: 20px; color: #8a7a67; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Récapitulatif de votre demande</h3>
@@ -128,7 +146,9 @@ export async function submitContactForm(data: FormData) {
           </div>
           
           <br/>
-          <p style="line-height: 1.6; color: #444;">À très vite,<br/><strong>Iamyoka</strong></p>
+          <div style="line-height: 1.6; color: #444;">
+            ${formattedClosing}
+          </div>
           <hr style="border: none; border-top: 1px solid #eaeaea; margin: 40px 0 20px 0;" />
           <p style="font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">Ceci est un message automatique, vous serez recontacté prochainement.</p>
         </div>
@@ -146,4 +166,49 @@ export async function submitContactForm(data: FormData) {
     console.error("Erreur lors de l'envoi du message:", error);
     return { error: "Une erreur interne est survenue. Veuillez réessayer ou nous contacter directement." };
   }
+}
+
+export async function getEmailSettings() {
+  const subjectSetting = await prisma.setting.findUnique({ where: { key: 'emailSubject' } });
+  const introSetting = await prisma.setting.findUnique({ where: { key: 'emailIntroText' } });
+  const closingSetting = await prisma.setting.findUnique({ where: { key: 'emailClosingText' } });
+
+  return {
+    subject: subjectSetting?.value || "Votre demande de contact - Iamyoka",
+    introText: introSetting?.value || "Nous avons bien reçu votre message concernant votre mariage et nous vous en remercions infiniment.\n\nNous allons étudier votre demande avec soin et reviendrons vers vous très prochainement pour en discuter de vive voix.",
+    closingText: closingSetting?.value || "À très vite,\nIamyoka"
+  };
+}
+
+export async function updateEmailSettings(formData: FormData) {
+  const subject = formData.get('subject') as string;
+  const introText = formData.get('introText') as string;
+  const closingText = formData.get('closingText') as string;
+
+  if (subject !== null) {
+    await prisma.setting.upsert({
+      where: { key: 'emailSubject' },
+      update: { value: subject },
+      create: { key: 'emailSubject', value: subject }
+    });
+  }
+
+  if (introText !== null) {
+    await prisma.setting.upsert({
+      where: { key: 'emailIntroText' },
+      update: { value: introText },
+      create: { key: 'emailIntroText', value: introText }
+    });
+  }
+
+  if (closingText !== null) {
+    await prisma.setting.upsert({
+      where: { key: 'emailClosingText' },
+      update: { value: closingText },
+      create: { key: 'emailClosingText', value: closingText }
+    });
+  }
+
+  revalidatePath('/admin');
+  return { success: true };
 }

@@ -4,11 +4,17 @@ import { useState, useRef, useEffect } from 'react';
 import { addPhoto, deletePhoto, addFilm, deleteFilm, updateHeroVideo, movePhoto, moveFilm, updatePhotosOrder, updatePhoto, updateFilmsOrder, updateFilm } from '@/actions/media';
 import { updateQuestion, deleteLeads } from '@/actions/quiz';
 import { addFaq, updateFaq, deleteFaq, moveFaq } from '@/actions/faq';
+import { updateEmailSettings } from '@/actions/contact';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads, initialFaqs }: { initialMedia: any, initialQuiz: any, initialLeads: any[], initialFaqs: any[] }) {
-  const [activeTab, setActiveTab] = useState<'hero' | 'photos' | 'films' | 'quiz' | 'leads' | 'faq'>('leads');
+export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads, initialFaqs, initialEmailSettings }: { initialMedia: any, initialQuiz: any, initialLeads: any[], initialFaqs: any[], initialEmailSettings?: any }) {
+  const [activeTab, setActiveTab] = useState<'hero' | 'photos' | 'films' | 'quiz' | 'leads' | 'faq' | 'email'>('leads');
+  const [emailState, setEmailState] = useState({
+    subject: initialEmailSettings?.subject || "Votre demande de contact - Iamyoka",
+    introText: initialEmailSettings?.introText || "Nous avons bien reçu votre message concernant votre mariage et nous vous en remercions infiniment.\n\nNous allons étudier votre demande avec soin et reviendrons vers vous très prochainement pour en discuter de vive voix.",
+    closingText: initialEmailSettings?.closingText || "À très vite,\nIamyoka"
+  });
   const [loading, setLoading] = useState(false);
   const [editingFaq, setEditingFaq] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -361,6 +367,7 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
     films: 'Films de Mariage',
     faq: 'Questions Fréquentes',
     quiz: 'Paramétrage du Quiz',
+    email: "Template d'Email",
   };
 
   const renderNavCategories = () => (
@@ -423,6 +430,12 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
             className={`w-full text-left px-3 py-2 text-sm transition-colors ${activeTab === 'quiz' ? 'bg-brand-taupe/10 text-brand-taupe font-medium' : 'text-brand-ink hover:bg-brand-sand/30'}`}
           >
             Paramétrage du Quiz
+          </button>
+          <button 
+            onClick={() => { setActiveTab('email'); setShowAddForm(false); setMobileMenuOpen(false); }} 
+            className={`w-full text-left px-3 py-2 text-sm transition-colors ${activeTab === 'email' ? 'bg-brand-taupe/10 text-brand-taupe font-medium' : 'text-brand-ink hover:bg-brand-sand/30'}`}
+          >
+            Template d'Email
           </button>
         </div>
       </div>
@@ -729,9 +742,16 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
 
                           {/* URL */}
                           <td className="py-3 px-4 align-middle text-xs text-brand-taupe max-w-xs truncate">
-                            <a href={photo.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                              {photo.url}
-                            </a>
+                            {photo.url?.startsWith('data:') ? (
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] uppercase tracking-widest font-bold bg-brand-taupe/10 text-brand-taupe border border-brand-taupe/30 shadow-2xs">
+                                <span>📷</span>
+                                <span>Image Téléversée</span>
+                              </span>
+                            ) : (
+                              <a href={photo.url} target="_blank" rel="noopener noreferrer" className="hover:underline truncate block max-w-[200px]">
+                                {photo.url}
+                              </a>
+                            )}
                           </td>
 
                           {/* Actions */}
@@ -1486,9 +1506,9 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                 <input 
                   type="url" 
                   name="url" 
-                  defaultValue={editingPhoto.url} 
+                  defaultValue={editingPhoto.url?.startsWith('data:') ? '' : editingPhoto.url} 
                   className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-xs text-brand-taupe" 
-                  placeholder="https://..." 
+                  placeholder={editingPhoto.url?.startsWith('data:') ? "Fichier stocké dans la BDD (Laissez vide pour conserver)" : "https://..."} 
                 />
                 {editingPhoto.url && (
                   <div className="mt-4">
@@ -1647,6 +1667,167 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'email' && (
+        <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
+          <div className="bg-white p-6 border border-brand-sand shadow-sm">
+            <h2 className="text-xl font-serif text-brand-ink mb-1">Emails Automatiques & Confirmation</h2>
+            <p className="text-xs text-brand-ink/60 uppercase tracking-widest">
+              Personnalisez les textes de l'email de confirmation automatique envoyé aux futurs mariés sans perdre la mise en forme HTML du site.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Formulaire de personnalisation */}
+            <div className="bg-white p-8 border border-brand-sand shadow-sm space-y-6">
+              <h3 className="text-lg font-serif text-brand-ink mb-4 border-b border-brand-sand pb-3">
+                Champs du Template
+              </h3>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const fd = new FormData(e.currentTarget);
+                await updateEmailSettings(fd);
+                setEmailState({
+                  subject: fd.get('subject') as string,
+                  introText: fd.get('introText') as string,
+                  closingText: fd.get('closingText') as string,
+                });
+                setLoading(false);
+              }} className="space-y-6">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2 font-medium">
+                    Sujet de l'email de confirmation
+                  </label>
+                  <input 
+                    type="text" 
+                    name="subject" 
+                    value={emailState.subject} 
+                    onChange={(e) => setEmailState(prev => ({ ...prev, subject: e.target.value }))}
+                    className="w-full border-b border-brand-taupe/40 py-2 focus:outline-none focus:border-brand-taupe bg-transparent text-sm font-medium" 
+                    required 
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2 font-medium">
+                    Texte d'introduction / Confirmation
+                  </label>
+                  <textarea 
+                    name="introText" 
+                    rows={5}
+                    value={emailState.introText} 
+                    onChange={(e) => setEmailState(prev => ({ ...prev, introText: e.target.value }))}
+                    className="w-full border border-brand-sand p-3 focus:outline-none focus:border-brand-taupe bg-brand-paper/40 text-xs text-brand-ink leading-relaxed rounded-xs" 
+                    required 
+                  />
+                  <p className="text-[10px] text-brand-ink/50 mt-1">
+                    Astuce : Utilisez <code className="bg-brand-sand/50 px-1 py-0.5 rounded text-brand-taupe font-mono">{"{{nom}}"}</code> pour inclure le prénom/nom des mariés.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-brand-ink/50 mb-2 font-medium">
+                    Texte de clôture / Formule de politesse
+                  </label>
+                  <textarea 
+                    name="closingText" 
+                    rows={3}
+                    value={emailState.closingText} 
+                    onChange={(e) => setEmailState(prev => ({ ...prev, closingText: e.target.value }))}
+                    className="w-full border border-brand-sand p-3 focus:outline-none focus:border-brand-taupe bg-brand-paper/40 text-xs text-brand-ink leading-relaxed rounded-xs" 
+                    required 
+                  />
+                </div>
+
+                {/* Guide des Balises Dynamiques */}
+                <div className="bg-brand-paper p-4 border border-brand-sand rounded-xs space-y-2">
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-brand-taupe">
+                    Variables Dynamiques Disponibles :
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-brand-ink/70">
+                    <div><code className="bg-white px-1.5 py-0.5 border text-brand-ink font-mono text-[11px]">{"{{nom}}"}</code> : Noms des mariés</div>
+                    <div><code className="bg-white px-1.5 py-0.5 border text-brand-ink font-mono text-[11px]">{"{{email}}"}</code> : Email du prospect</div>
+                    <div><code className="bg-white px-1.5 py-0.5 border text-brand-ink font-mono text-[11px]">{"{{date}}"}</code> : Date du mariage</div>
+                    <div><code className="bg-white px-1.5 py-0.5 border text-brand-ink font-mono text-[11px]">{"{{lieu}}"}</code> : Lieu de réception</div>
+                    <div><code className="bg-white px-1.5 py-0.5 border text-brand-ink font-mono text-[11px]">{"{{services}}"}</code> : Services choisis</div>
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={loading} 
+                  className="w-full inline-flex items-center justify-center space-x-2 bg-brand-taupe text-white py-3 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Enregistrement du Template...</span>
+                    </>
+                  ) : (
+                    <span>Enregistrer le Template d'Email</span>
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Aperçu en direct du mail HTML */}
+            <div className="bg-white p-8 border border-brand-sand shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-brand-sand pb-3">
+                <h3 className="text-lg font-serif text-brand-ink">
+                  Aperçu du mail (Rendu Réel Client)
+                </h3>
+                <span className="bg-emerald-50 text-emerald-700 text-[9px] uppercase tracking-widest px-2.5 py-1 border border-emerald-200 rounded-full font-bold">
+                  Mise en forme préservée
+                </span>
+              </div>
+
+              <div className="border border-brand-sand bg-white p-6 shadow-inner rounded-sm font-sans space-y-5 text-sm text-gray-800">
+                <div className="border-b border-gray-100 pb-3">
+                  <p className="text-xs text-gray-500 font-mono"><strong>Sujet :</strong> {emailState.subject.replace(/{{nom}}/g, 'Camille & Thomas')}</p>
+                  <p className="text-xs text-gray-400 font-mono"><strong>De :</strong> Iamyoka &lt;contact@iamyoka.fr&gt;</p>
+                </div>
+
+                <h2 className="text-xl font-light text-gray-800 tracking-wide">Bonjour Camille & Thomas,</h2>
+
+                <div className="text-sm text-gray-600 leading-relaxed space-y-2 whitespace-pre-line">
+                  {emailState.introText.replace(/{{nom}}/g, 'Camille & Thomas')}
+                </div>
+
+                {/* Boîte de récapitulatif stylisée */}
+                <div className="bg-neutral-50 p-5 rounded border border-neutral-200 my-4">
+                  <h3 className="text-xs uppercase tracking-widest text-brand-taupe font-bold mb-3">Récapitulatif de votre demande</h3>
+                  <div className="space-y-1.5 text-xs text-gray-700">
+                    <p><strong>Noms :</strong> Camille & Thomas</p>
+                    <p><strong>Téléphone :</strong> 06 12 34 56 78</p>
+                    <p><strong>Date prévue :</strong> 14/06/2027</p>
+                    <p><strong>Lieu :</strong> Domaine de Verchant</p>
+                    <p><strong>Services souhaités :</strong> Photo & Film de Mariage</p>
+                    <div className="pt-2 border-t border-neutral-200 mt-2">
+                      <strong>Votre message :</strong>
+                      <p className="italic text-gray-500 border-l-2 border-brand-taupe pl-3 mt-1">
+                        "Bonjour Iamyoka, nous adorons votre style cinématique..."
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line pt-2">
+                  {emailState.closingText.replace(/{{nom}}/g, 'Camille & Thomas')}
+                </div>
+
+                <div className="border-t border-gray-200 pt-4 text-center">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-widest">Ceci est un message automatique, vous serez recontacté prochainement.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

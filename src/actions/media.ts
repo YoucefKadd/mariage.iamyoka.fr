@@ -138,10 +138,15 @@ export async function deletePhoto(id: string) {
 
 export async function updatePhoto(data: FormData) {
   const id = data.get('id') as string;
-  const finalUrl = await processImageUpload(data);
+  const newUrl = await processImageUpload(data);
   const title = data.get('title') as string;
 
-  if (!id || !finalUrl) return { error: "L'identifiant et l'image sont obligatoires" };
+  if (!id) return { error: "L'identifiant est obligatoire" };
+
+  const existing = await prisma.photo.findUnique({ where: { id } });
+  const finalUrl = newUrl || existing?.url;
+
+  if (!finalUrl) return { error: "Une image est obligatoire" };
 
   await prisma.photo.update({
     where: { id },
