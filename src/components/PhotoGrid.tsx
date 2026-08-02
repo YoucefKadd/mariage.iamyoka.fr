@@ -5,14 +5,23 @@ import { useState, useEffect, useCallback } from "react";
 export default function PhotoGrid({ photos }: { photos: any[] }) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
+  useEffect(() => {
+    if (selectedIndex !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [selectedIndex]);
+
   const openLightbox = (index: number) => {
     setSelectedIndex(index);
-    document.body.style.overflow = 'hidden';
   };
 
   const closeLightbox = useCallback(() => {
     setSelectedIndex(null);
-    document.body.style.overflow = 'auto';
   }, []);
 
   const nextPhoto = useCallback(() => {

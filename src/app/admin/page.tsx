@@ -3,6 +3,7 @@ import { getMedia } from '@/actions/media';
 import { getQuiz, getLeads } from '@/actions/quiz';
 import { getFaqs } from '@/actions/faq';
 import { getEmailSettings } from '@/actions/contact';
+import { getSections } from '@/actions/content';
 import AdminDashboard from '@/components/AdminDashboard';
 import PasswordInput from '@/components/PasswordInput';
 import { redirect } from 'next/navigation';
@@ -36,6 +37,7 @@ export default async function AdminPage() {
   const leads = await getLeads();
   const faqs = await getFaqs();
   const emailSettings = await getEmailSettings();
+  const sections = await getSections();
 
   return (
     <div className="min-h-screen bg-brand-paper">
@@ -51,7 +53,14 @@ export default async function AdminPage() {
       </header>
       
       <main className="w-full mx-auto py-12 px-4 md:px-8">
-        <AdminDashboard initialMedia={media} initialQuiz={quiz} initialLeads={leads} initialFaqs={faqs} initialEmailSettings={emailSettings} />
+        <AdminDashboard 
+          initialMedia={media} 
+          initialQuiz={quiz} 
+          initialLeads={leads} 
+          initialFaqs={faqs} 
+          initialEmailSettings={emailSettings}
+          initialSections={sections} 
+        />
       </main>
     </div>
   );

@@ -7,9 +7,10 @@ import { addFaq, updateFaq, deleteFaq, moveFaq } from '@/actions/faq';
 import { updateEmailSettings } from '@/actions/contact';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import RichTextEditor from './RichTextEditor';
 
-export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads, initialFaqs, initialEmailSettings }: { initialMedia: any, initialQuiz: any, initialLeads: any[], initialFaqs: any[], initialEmailSettings?: any }) {
-  const [activeTab, setActiveTab] = useState<'hero' | 'photos' | 'films' | 'quiz' | 'leads' | 'faq' | 'email'>('leads');
+export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads, initialFaqs, initialEmailSettings, initialSections = [] }: { initialMedia: any, initialQuiz: any, initialLeads: any[], initialFaqs: any[], initialEmailSettings?: any, initialSections?: any[] }) {
+  const [activeTab, setActiveTab] = useState<'hero' | 'photos' | 'films' | 'quiz' | 'leads' | 'faq' | 'email' | 'content'>('leads');
   const [emailState, setEmailState] = useState({
     subject: initialEmailSettings?.subject || "Votre demande de contact - Iamyoka",
     introText: initialEmailSettings?.introText || "Nous avons bien reçu votre message concernant votre mariage et nous vous en remercions infiniment.\n\nNous allons étudier votre demande avec soin et reviendrons vers vous très prochainement pour en discuter de vive voix.",
@@ -17,6 +18,9 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
   });
   const [loading, setLoading] = useState(false);
   const [editingFaq, setEditingFaq] = useState<any>(null);
+  const [sections, setSections] = useState<any[]>(initialSections);
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const [showLayoutModal, setShowLayoutModal] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -360,6 +364,57 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
     doc.save("iamyoka_contacts.pdf");
   };
 
+  const handleSaveSection = async (sectionId: string, updatedSection: any) => {
+    setLoading(true);
+    const newSections = sections.map(s => s.id === sectionId ? updatedSection : s);
+    setSections(newSections);
+    const { saveSections } = await import('@/actions/content');
+    await saveSections(newSections);
+    setLoading(false);
+    setEditingSectionId(null);
+    alert('Section mise à jour avec succès.');
+  };
+
+  const handleDeleteSection = async (sectionId: string) => {
+    if (!confirm('Voulez-vous vraiment supprimer cette section ?')) return;
+    setLoading(true);
+    const newSections = sections.filter(s => s.id !== sectionId);
+    setSections(newSections);
+    const { saveSections } = await import('@/actions/content');
+    await saveSections(newSections);
+    setLoading(false);
+  };
+
+  const handleMoveSection = async (index: number, direction: -1 | 1) => {
+    if (index + direction < 0 || index + direction >= sections.length) return;
+    const newSections = [...sections];
+    const temp = newSections[index];
+    newSections[index] = newSections[index + direction];
+    newSections[index + direction] = temp;
+    
+    setSections(newSections);
+    const { saveSections } = await import('@/actions/content');
+    await saveSections(newSections);
+  };
+
+  const handleAddSection = async (layout: 'concept' | 'about' | 'text_only' | 'image_left') => {
+    const newId = `section_${Date.now()}`;
+    const newSection: any = {
+      id: newId,
+      layout,
+      subtitle: 'Nouvelle Section',
+      titleHtml: 'Titre principal',
+      contentHtml: '<p>Votre texte ici...</p>',
+      imageUrl: layout !== 'text_only' ? 'https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1974&auto=format&fit=crop' : '',
+      placement: (layout === 'concept' || layout === 'text_only') ? 'top' : 'bottom'
+    };
+    const newSections = [...sections, newSection];
+    setSections(newSections);
+    setEditingSectionId(newId);
+    const { saveSections } = await import('@/actions/content');
+    await saveSections(newSections);
+  };
+
   const tabLabels: Record<string, string> = {
     leads: 'Boîte de Réception',
     hero: "Vidéo d'Accueil",
@@ -437,6 +492,12 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
           >
             Template d'Email
           </button>
+          <button 
+            onClick={() => { setActiveTab('content'); setShowAddForm(false); setMobileMenuOpen(false); }} 
+            className={`w-full text-left px-3 py-2 text-sm transition-colors ${activeTab === 'content' ? 'bg-brand-taupe/10 text-brand-taupe font-medium' : 'text-brand-ink hover:bg-brand-sand/30'}`}
+          >
+            Textes & Images
+          </button>
         </div>
       </div>
     </>
@@ -473,6 +534,10 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
         {/* Dropdown Menu on Mobile */}
         {mobileMenuOpen && (
           <div className="bg-white p-5 border border-brand-sand shadow-xl space-y-6 animate-[fadeIn_0.2s_ease-out]">
+            <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-brand-ink text-white px-4 py-3 text-[10px] uppercase tracking-widest hover:bg-brand-taupe transition-colors">
+              <span>Voir le site</span>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </a>
             {renderNavCategories()}
           </div>
         )}
@@ -480,6 +545,12 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
 
       {/* Desktop Sidebar Navigation */}
       <div className="hidden md:block w-64 shrink-0 space-y-8 bg-white p-6 border border-brand-sand shadow-sm sticky top-6">
+        <div className="mb-2">
+           <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-brand-ink text-white px-4 py-3 text-[10px] uppercase tracking-widest hover:bg-brand-taupe transition-colors">
+              <span>Voir le site</span>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+           </a>
+        </div>
         {renderNavCategories()}
       </div>
 
@@ -1410,9 +1481,6 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
             </div>
         </div>
       )}
-      
-      </div> {/* Fin Contenu Principal */}
-
       {/* Modal de confirmation de suppression avec mot de passe */}
       {deleteModalOpen && (
         <div className="fixed inset-0 bg-brand-ink/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-[fadeIn_0.2s_ease-out]">
@@ -1835,6 +1903,260 @@ export default function AdminDashboard({ initialMedia, initialQuiz, initialLeads
         </div>
       )}
 
+      {activeTab === 'content' && (
+        <div className="space-y-12 animate-[fadeIn_0.3s_ease-out]">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 border border-brand-sand shadow-sm">
+             <div>
+                <h2 className="text-xl font-serif">Textes & Images du site</h2>
+                <p className="text-xs text-brand-ink/60 uppercase tracking-widest mt-1">Ajoutez, modifiez ou supprimez des sections de la page d'accueil</p>
+             </div>
+             <div className="flex flex-wrap gap-2">
+                <button onClick={() => setShowLayoutModal(true)} className="bg-brand-taupe text-white px-6 py-3 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors font-bold shadow-sm">
+                  + Ajouter une section
+                </button>
+             </div>
+          </div>
+
+          <div className="space-y-6">
+            {sections.map((section, index) => (
+              <div key={section.id} className="bg-white p-6 border border-brand-sand shadow-sm relative">
+                
+                {/* Header Section */}
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2 pb-4 border-b border-brand-sand">
+                  <div className="flex items-center gap-3">
+                    <span className="bg-brand-paper px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-brand-ink/50 border border-brand-sand shrink-0">
+                      Position {index + 1}
+                    </span>
+                    <h3 className="text-sm font-serif text-brand-ink font-bold line-clamp-1">
+                      {section.subtitle} — {section.layout === 'concept' ? 'Modèle 1 (Image Droite)' : section.layout === 'about' ? 'Modèle 2 (Image Gauche)' : section.layout === 'text_only' ? 'Modèle 3 (Texte Seul)' : 'Modèle 4 (Image Gauche Alt)'}
+                    </h3>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button onClick={() => handleMoveSection(index, -1)} disabled={index === 0} className="p-2 border border-brand-sand hover:bg-brand-paper disabled:opacity-30 disabled:hover:bg-transparent" title="Monter">
+                      ↑
+                    </button>
+                    <button onClick={() => handleMoveSection(index, 1)} disabled={index === sections.length - 1} className="p-2 border border-brand-sand hover:bg-brand-paper disabled:opacity-30 disabled:hover:bg-transparent" title="Descendre">
+                      ↓
+                    </button>
+                    <button onClick={() => setEditingSectionId(editingSectionId === section.id ? null : section.id)} className="ml-2 px-4 py-2 bg-brand-taupe text-white text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors">
+                      {editingSectionId === section.id ? 'Fermer' : 'Modifier'}
+                    </button>
+                    <button onClick={() => handleDeleteSection(section.id)} className="ml-2 p-2 border border-red-200 text-red-500 hover:bg-red-50 text-xs font-bold" title="Supprimer">
+                      X
+                    </button>
+                  </div>
+                </div>
+
+                {/* Formulaire Section */}
+                {editingSectionId === section.id ? (
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      handleSaveSection(section.id, {
+                        ...section,
+                        subtitle: fd.get('subtitle') as string,
+                        imageUrl: (fd.get('imageUrl') as string) || section.imageUrl,
+                        placement: fd.get('placement') as string
+                      });
+                    }} 
+                    className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6 pt-2 animate-[fadeIn_0.2s_ease-out]"
+                  >
+                    <div className="space-y-6">
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <label className="block text-[10px] uppercase tracking-widest text-brand-ink/60 mb-2">Emplacement</label>
+                          <select name="placement" defaultValue={section.placement || (section.layout === 'concept' ? 'top' : 'bottom')} className="w-full border border-brand-taupe/20 p-2 text-sm bg-white focus:outline-brand-taupe">
+                            <option value="top">Haut de page (Après Accueil)</option>
+                            <option value="bottom">Bas de page (Après Portfolio)</option>
+                          </select>
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-[10px] uppercase tracking-widest text-brand-ink/60 mb-2">Sous-titre</label>
+                          <input type="text" name="subtitle" defaultValue={section.subtitle} className="w-full border border-brand-taupe/20 p-2 text-sm bg-white focus:outline-brand-taupe" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-brand-ink/60 mb-2">Titre Principal</label>
+                        <RichTextEditor 
+                          value={section.titleHtml} 
+                          onChange={(html) => {
+                            const newSections = sections.map(s => s.id === section.id ? { ...s, titleHtml: html } : s);
+                            setSections(newSections);
+                          }} 
+                          minHeight="60px"
+                        />
+                        <p className="text-[9px] text-brand-ink/40 mt-1 italic">Utilisez l'italique pour le style Iamyoka.</p>
+                      </div>
+                      {section.layout !== 'text_only' && (
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-widest text-brand-ink/60 mb-2">Lien URL de l'image</label>
+                          <input type="url" name="imageUrl" defaultValue={section.imageUrl} className="w-full border border-brand-taupe/20 p-2 text-sm bg-white focus:outline-brand-taupe" required />
+                          <div className="mt-2 h-32 w-full bg-brand-paper relative">
+                            <img src={section.imageUrl} className="w-full h-full object-cover" alt="Aperçu" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-6 flex flex-col">
+                      <div className="flex-1">
+                        <label className="block text-[10px] uppercase tracking-widest text-brand-ink/60 mb-2">Contenu (Texte & Paragraphes)</label>
+                        <RichTextEditor 
+                          value={section.contentHtml} 
+                          onChange={(html) => {
+                            const newSections = sections.map(s => s.id === section.id ? { ...s, contentHtml: html } : s);
+                            setSections(newSections);
+                          }} 
+                          minHeight="250px"
+                        />
+                      </div>
+                      <div className="pt-4 flex justify-end gap-3">
+                        <button type="button" onClick={() => setEditingSectionId(null)} className="px-6 py-3 border border-brand-sand text-brand-ink text-[10px] uppercase tracking-widest hover:bg-brand-sand/50 transition-colors">
+                          Annuler
+                        </button>
+                        <button type="submit" disabled={loading} className="bg-brand-taupe text-white px-8 py-3 text-[10px] uppercase tracking-widest hover:bg-brand-ink transition-colors disabled:opacity-50">
+                          {loading ? 'Enregistrement...' : 'Enregistrer cette section'}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="flex gap-6 items-center mt-4">
+                    <div className="w-24 h-16 bg-brand-paper overflow-hidden border border-brand-sand shrink-0">
+                      <img src={section.imageUrl} className="w-full h-full object-cover" alt="" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-serif line-clamp-1" dangerouslySetInnerHTML={{ __html: section.titleHtml }}></div>
+                      <div className="text-xs text-brand-ink/60 mt-1 line-clamp-2" dangerouslySetInnerHTML={{ __html: section.contentHtml }}></div>
+                    </div>
+                  </div>
+                )}
+                
+              </div>
+            ))}
+            
+            {sections.length === 0 && (
+              <div className="bg-brand-paper p-12 text-center border border-brand-sand border-dashed">
+                <p className="text-sm text-brand-ink/60">Aucune section dynamique n'est ajoutée.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      </div> {/* Fin Contenu Principal */}
+
+      {showLayoutModal && (
+        <div className="fixed inset-0 bg-brand-ink/40 flex items-center justify-center p-4 z-[100] backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-brand-paper w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl relative border border-brand-sand p-8">
+            <button 
+              onClick={() => setShowLayoutModal(false)}
+              className="absolute top-6 right-6 text-brand-ink/60 hover:text-brand-ink text-sm font-bold uppercase tracking-widest"
+            >
+              Fermer X
+            </button>
+            <h2 className="text-2xl font-serif text-brand-ink mb-2">Choisir un modèle</h2>
+            <p className="text-xs text-brand-ink/60 uppercase tracking-widest mb-10">Sélectionnez la disposition qui correspond à votre besoin</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+              {/* Modèle 1 */}
+              <div 
+                onClick={() => { handleAddSection('concept'); setShowLayoutModal(false); }}
+                className="group cursor-pointer bg-white p-6 border border-brand-sand hover:border-brand-taupe transition-colors shadow-sm"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-serif text-brand-ink font-bold">Modèle 1 (Image Droite)</h3>
+                </div>
+                <div className="w-full aspect-[4/3] bg-brand-paper flex">
+                  <div className="w-1/2 p-6 flex flex-col justify-center gap-3">
+                    <div className="h-2 w-12 bg-brand-taupe/30"></div>
+                    <div className="h-4 w-32 bg-brand-ink/20"></div>
+                    <div className="h-4 w-24 bg-brand-ink/20"></div>
+                    <div className="space-y-2 mt-4">
+                      <div className="h-1 w-full bg-brand-ink/10"></div>
+                      <div className="h-1 w-full bg-brand-ink/10"></div>
+                      <div className="h-1 w-3/4 bg-brand-ink/10"></div>
+                    </div>
+                  </div>
+                  <div className="w-1/2 p-6 pb-0 pl-0">
+                    <div className="w-full h-full bg-brand-ink/10 relative">
+                      <div className="absolute -bottom-3 -left-3 w-12 h-12 bg-brand-sand/50"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modèle 2 */}
+              <div 
+                onClick={() => { handleAddSection('about'); setShowLayoutModal(false); }}
+                className="group cursor-pointer bg-white p-6 border border-brand-sand hover:border-brand-taupe transition-colors shadow-sm"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-serif text-brand-ink font-bold">Modèle 2 (Image Gauche)</h3>
+                </div>
+                <div className="w-full aspect-[4/3] bg-white flex gap-6 p-6">
+                  <div className="w-1/2 bg-brand-ink/10 rounded-sm"></div>
+                  <div className="w-1/2 flex flex-col justify-center gap-3">
+                    <div className="h-2 w-12 bg-brand-taupe/30"></div>
+                    <div className="h-4 w-28 bg-brand-ink/20"></div>
+                    <div className="space-y-2 mt-4">
+                      <div className="h-1 w-full bg-brand-ink/10"></div>
+                      <div className="h-1 w-full bg-brand-ink/10"></div>
+                      <div className="h-1 w-4/5 bg-brand-ink/10"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modèle 3 */}
+              <div 
+                onClick={() => { handleAddSection('text_only'); setShowLayoutModal(false); }}
+                className="group cursor-pointer bg-white p-6 border border-brand-sand hover:border-brand-taupe transition-colors shadow-sm"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-serif text-brand-ink font-bold">Modèle 3 (Texte Seul)</h3>
+                </div>
+                <div className="w-full aspect-[4/3] bg-brand-paper flex flex-col items-center justify-center gap-4 p-8">
+                  <div className="h-2 w-16 bg-brand-taupe/30"></div>
+                  <div className="h-6 w-48 bg-brand-ink/20"></div>
+                  <div className="h-6 w-32 bg-brand-ink/20"></div>
+                  <div className="space-y-2 w-full mt-6 flex flex-col items-center">
+                    <div className="h-1 w-full bg-brand-ink/10"></div>
+                    <div className="h-1 w-11/12 bg-brand-ink/10"></div>
+                    <div className="h-1 w-3/4 bg-brand-ink/10"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modèle 4 */}
+              <div 
+                onClick={() => { handleAddSection('image_left'); setShowLayoutModal(false); }}
+                className="group cursor-pointer bg-white p-6 border border-brand-sand hover:border-brand-taupe transition-colors shadow-sm"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-serif text-brand-ink font-bold">Modèle 4 (Image Gauche Alt)</h3>
+                </div>
+                <div className="w-full aspect-[4/3] bg-brand-paper flex flex-row-reverse gap-6 p-6">
+                  <div className="w-1/2 flex flex-col justify-center gap-3">
+                    <div className="h-2 w-12 bg-brand-taupe/30"></div>
+                    <div className="h-4 w-28 bg-brand-ink/20"></div>
+                    <div className="space-y-2 mt-4">
+                      <div className="h-1 w-full bg-brand-ink/10"></div>
+                      <div className="h-1 w-full bg-brand-ink/10"></div>
+                      <div className="h-1 w-4/5 bg-brand-ink/10"></div>
+                    </div>
+                  </div>
+                  <div className="w-1/2 bg-brand-ink/10 border border-brand-sand shadow-sm"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
